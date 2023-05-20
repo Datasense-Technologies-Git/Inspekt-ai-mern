@@ -1,6 +1,10 @@
 const { User } = require("../models/user");
 const datalize = require("datalize");
 const field = datalize.field;
+const bycrpt = require("bcryptjs");
+const { response } = require("express");
+const jwt = require("jsonwebtoken");
+const accessTokenKey = require("../config/config")
 
 var appData = {
   status: 0,
@@ -8,6 +12,9 @@ var appData = {
   data: [],
   error: [],
 };
+
+const saltRounds = 10;
+
 
 //Simple version, without validation or sanitation
 exports.test = function (req, res) {
@@ -59,3 +66,43 @@ exports.checkUser = function (req, res) {
     }
   }
 };
+
+exports.register = async (req, res) => {
+  if (req.body?.user_name && req.body?.password) {
+    const checkUser = await User.find({ user_name: req.body.user_name });
+    if (checkUser.length > 0) {
+      appData["status"] = 4;
+      appData["message"] = "Username already exist!";
+      appData["data"] = [];
+      appData["error"] = [];
+      return res.status(403).send(appData);
+    } 
+    else{
+      bycrpt.hash(req.body.user_name + req.body.password, saltRounds, (err, hash) => {
+        if (!err) {
+          req.body["password"] = hash;
+          let newRecord = new User(req.body);
+          newRecord.save((err, response) => {
+            if (!err) {
+              response["password"] = null;
+              response
+              res.status(200).send(response);
+            } else {
+              res.status(400).send(err.message);
+            }
+          });
+        } else {
+          res.status(400).send({ message: "Error encrypting data" });
+        }
+      });
+    } 
+  } else {
+    appData["status"] = 4;
+    appData["message"] = "Invalid Details!";
+    appData["data"] = [];
+    appData["error"] = [];
+    res.send(403).status(appData);
+  }
+};
+
+
