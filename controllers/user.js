@@ -117,3 +117,14 @@ exports.login = async (req, res) => {
     res.status(400).send(appData);
   }
 };
+
+exports.logout = async (req,res) => {
+  if(req)
+  {
+    appData["status"] = 0;
+    appData["message"] = "Logout Successfully";
+    appData["data"] = [];
+    appData["error"] = [];
+    res.status(200).send(appData)
+  }
+}
