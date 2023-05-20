@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 
 mongoose.connect(
-  "mongodb://localhost:27017/Inspket-ai",
+  "mongodb+srv://ashwinraj:voRPTd2YKqeWJWAs@cluster0.lcgjy0u.mongodb.net/Inspeckt-ai",
   {
     useNewUrlParser: true,
     useUnifiedTopology: true,
