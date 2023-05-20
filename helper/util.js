@@ -1,4 +1,8 @@
-function create_UUID(){
+const jwt = require("jsonwebtoken");
+const accessTokenKey = require("../config/config")
+ 
+ 
+ module.exports.create_UUID = () => {
     var dt = new Date().getTime();
     var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
         var r = (dt + Math.random()*16)%16 | 0;
@@ -8,8 +12,6 @@ function create_UUID(){
     return uuid;
 }
 
-function generateAccessToken(user) {
+module.exports.generateAccessToken = (user) => {
     return jwt.sign(user, accessTokenKey, { expiresIn: "365d" });
   }
-
-  module.exports= {create_UUID,generateAccessToken}

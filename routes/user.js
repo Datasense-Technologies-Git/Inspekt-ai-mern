@@ -5,9 +5,8 @@ var router = express.Router();
 var UserController = require("../controllers/user");
 
 // a simple test url to check that all of our files are communicating correctly.
-router.get("/test", UserController.test);
-
-router.post("/checkUser", UserController.checkUser);
 router.post("/register", UserController.register);
+router.post("/login", UserController.login);
+
 
 module.exports = router;
