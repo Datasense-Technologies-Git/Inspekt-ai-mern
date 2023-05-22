@@ -64,8 +64,18 @@ exports.register = async (req, res) => {
   }
 };
 
+exports.retiveData = async(req,res)=>{
+    try {
+        const retrive  = await dataSchema.find({});
+        res.json({msg:"All data Retrived",data:retrive})
+    } catch (error) {
+        res.json({msg:"Something Wrong",data:error})
+    }
+
+};
+
 exports.login = async (req, res) => {
-  if (req.body?.user_name && req.body?.password) {
+  if (req.body?.user_name || req.body?.password) {
     await User.findOne({ user_name: req.body.user_name }, (err, response) => {
       if (!err && response) {
         bycrpt.compare(

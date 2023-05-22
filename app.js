@@ -12,7 +12,7 @@ const userRoutes = require("./routes/user");
 const PORT = process.env.PORT || 3002;
 
 app.listen(PORT, () => {
-  console.log("Port is running");
+  console.log("Port is running = ",PORT);
 });
 
 app.use("/ins/user", userRoutes);
