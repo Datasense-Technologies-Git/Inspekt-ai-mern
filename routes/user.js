@@ -17,6 +17,7 @@ router.get("/allprojects",projects.retriveAllProjects);
 router.post("/singleproject",projects.retriveSingleProject);
 router.post("/filterproject",projects.filterProject);
 router.put("/updateproject/:id",projects.updateProject);
+router.delete("/deleteproject/:id",projects.deleteProject);
 
 
 module.exports = router;

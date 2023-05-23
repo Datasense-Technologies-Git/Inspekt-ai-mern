@@ -2,7 +2,7 @@ const dataSchema = require('../models/projects');
 
 var appData = {
     status: 0,
-    message: "",
+    message: "",                                                                               
     data: [],
     error: [],
 };
@@ -117,27 +117,63 @@ const retriveSingleProject = async (req, res) => {
 
 const updateProject = async (req, res) => {
     try {
-        console.log(req.params.id);
-        const updatedata = await dataSchema.findByIdAndUpdate(
-            req.params.id,
-            {
-                $set:req.body
-            }
-        )
-        console.log(updatedata)
-        const updateFiles = await updatedata.save();
+        const id = {project_id:req.params.id}
+        const updatedData = req.body;
+        const options = { new: true };
+
+        const result = await dataSchema.findOneAndUpdate(
+            id, updatedData, options
+        );
+        if(result){
+            const updateFiles = await result.save();
+            appData["status"] = 200;
+            appData["message"] = "Successfully Updated";
+            appData['data'] = [updateFiles];
+            appData['error'] = [];
+        }
+        else{
         appData["status"] = 200;
-        appData["message"] = "Successfully Updated";
-        appData['data'] = [updatedata];
+        appData["message"] = "not Successfully Updated";
+        appData['data'] = [];
         appData['error'] = [];
+        }
+
+        
         res.json(appData);
     } catch (error) {
         appData["status"] = 200;
-        appData["message"] = "No results found";
+        appData["message"] = "Sorry, No results found";
         appData['data'] = [];
-        appData['error'] = [];
+        appData['error'] = [error];
         res.json(appData);
     }
+}
+
+const deleteProject = async(req,res)=>{
+    try {
+        const removeData = await dataSchema.findOneAndDelete({project_id:req.params.id});
+        if(removeData){
+            appData["status"] = 200;
+            appData["message"] = "Your Project deleted";
+            appData['data'] = [removeData];
+            appData['error'] = [];
+        }
+        else{
+        appData["status"] = 200;
+        appData["message"] = "Your project not deleted";
+        appData['data'] = [];
+        appData['error'] = [];
+        }
+        res.json(appData);
+    } 
+    catch (error) {
+            appData["status"] = 200;
+            appData["message"] = "Sorry, Something went wrong";
+            appData['data'] = [];
+            appData['error'] = [error];
+            res.json(appData);
+    }
+      
 }
 
 const filterProject = async (req, res) => {
@@ -193,4 +229,4 @@ const filterProject = async (req, res) => {
 
 
 
-module.exports = { createProject, retriveAllProjects, retriveSingleProject, filterProject ,updateProject}
+module.exports = { createProject, retriveAllProjects, retriveSingleProject, filterProject ,updateProject, deleteProject}
