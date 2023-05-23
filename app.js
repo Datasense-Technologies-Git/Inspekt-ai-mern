@@ -7,7 +7,7 @@ var cors = require("cors");
 app.use(cors());
 app.use(bodyParser.json({ limit: "150mb", extended: true }));
 app.use(bodyParser.urlencoded({ limit: "150mb", extended: true }));
-const userRoutes = require("./routes/user");
+const userRoutes = require("./routes/routes");
 
 const PORT = process.env.PORT || 3002;
 app.get('/',(req,res) => {
