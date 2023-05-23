@@ -16,6 +16,7 @@ router.post("/createproject",projects.createProject);
 router.get("/allprojects",projects.retriveAllProjects);
 router.post("/singleproject",projects.retriveSingleProject);
 router.post("/filterproject",projects.filterProject);
+router.put("/updateproject/:id",projects.updateProject);
 
 
 module.exports = router;

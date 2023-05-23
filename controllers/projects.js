@@ -32,7 +32,7 @@ const createProject = async (req, res) => {
                 country: req.body.country,
                 state: req.body.state,
             })
-            console.log(userdata);
+            
             if (userdata.project_name.length === 0 || userdata.project_id.length === 0 || userdata.cust_name.length === 0 || userdata.description.length === 0 || userdata.built_year.length === 0 || userdata.no_of_floors.length === 0 || userdata.street_1.length === 0 || userdata.street_2.length === 0 || userdata.city.length === 0 || userdata.zipcode.length === 0 || userdata.country.length === 0 || userdata.state.length === 0) {
                 appData["status"] = 200;
                 appData["message"] = "Please fill all the fields";
@@ -115,14 +115,39 @@ const retriveSingleProject = async (req, res) => {
     }
 }
 
+const updateProject = async (req, res) => {
+    try {
+        console.log(req.params.id);
+        const updatedata = await dataSchema.findByIdAndUpdate(
+            req.params.id,
+            {
+                $set:req.body
+            }
+        )
+        console.log(updatedata)
+        const updateFiles = await updatedata.save();
+        appData["status"] = 200;
+        appData["message"] = "Successfully Updated";
+        appData['data'] = [updatedata];
+        appData['error'] = [];
+        res.json(appData);
+    } catch (error) {
+        appData["status"] = 200;
+        appData["message"] = "No results found";
+        appData['data'] = [];
+        appData['error'] = [];
+        res.json(appData);
+    }
+}
+
 const filterProject = async (req, res) => {
     try {
         const allprojects = await dataSchema.find({});
-        console.log(allprojects);
+        
         if (allprojects.length > 0) {
 
             const filters = allprojects.filter((data) => data.project_name === req.body.project_name);
-            console.log(filters);
+            
             if (filters.length > 0) {
 
                 appData["status"] = 200;
@@ -168,4 +193,4 @@ const filterProject = async (req, res) => {
 
 
 
-module.exports = { createProject, retriveAllProjects, retriveSingleProject, filterProject }
+module.exports = { createProject, retriveAllProjects, retriveSingleProject, filterProject ,updateProject}
