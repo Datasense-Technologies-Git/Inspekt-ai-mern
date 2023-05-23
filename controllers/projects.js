@@ -115,6 +115,31 @@ const retriveSingleProject = async (req, res) => {
     }
 }
 
+const updateProject = async (req, res) => {
+    try {
+        console.log(req.params.id);
+        const updatedata = await dataSchema.findByIdAndUpdate(
+            req.params.id,
+            {
+                $set:req.body
+            }
+        )
+        console.log(updatedata)
+        const updateFiles = await updatedata.save();
+        appData["status"] = 200;
+        appData["message"] = "Successfully Updated";
+        appData['data'] = [updatedata];
+        appData['error'] = [];
+        res.json(appData);
+    } catch (error) {
+        appData["status"] = 200;
+        appData["message"] = "No results found";
+        appData['data'] = [];
+        appData['error'] = [];
+        res.json(appData);
+    }
+}
+
 const filterProject = async (req, res) => {
     try {
         const allprojects = await dataSchema.find({});
@@ -168,4 +193,4 @@ const filterProject = async (req, res) => {
 
 
 
-module.exports = { createProject, retriveAllProjects, retriveSingleProject, filterProject }
+module.exports = { createProject, retriveAllProjects, retriveSingleProject, filterProject ,updateProject}
