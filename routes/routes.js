@@ -12,8 +12,8 @@ router.post("/register", UserController.register);
 router.post("/login", UserController.login);
 router.get("/logout",authenticator,UserController.logout);
 
-router.post("/addInspections",InspectionController.addInspections)
-router.get("/getAllInspections",InspectionController.getAllInspections)
+router.post("/addInspections",authenticator,InspectionController.addInspections)
+router.get("/getAllInspections",authenticator,InspectionController.getAllInspections)
 
 router.post("/createproject",projects.createProject);
 router.get("/allprojects",projects.retriveAllProjects);
