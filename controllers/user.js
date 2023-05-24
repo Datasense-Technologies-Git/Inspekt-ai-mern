@@ -28,7 +28,8 @@ exports.register = async (req, res) => {
       appData["data"] = [];
       appData["error"] = [];
       return res.status(403).send(appData);
-    } else {
+    } 
+    else {
       bycrpt.hash(
         req.body.user_name + req.body.password,
         saltRounds,
@@ -41,6 +42,7 @@ exports.register = async (req, res) => {
             };
             let newRecord = new User(body);
             newRecord.save((err, response) => {
+              console.log(response);
               if (!err) {
                 response["password"] = null;
                 response;

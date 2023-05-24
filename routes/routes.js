@@ -15,12 +15,12 @@ router.get("/logout",authenticator,UserController.logout);
 router.post("/addInspections",authenticator,InspectionController.addInspections)
 router.get("/getAllInspections",authenticator,InspectionController.getAllInspections)
 
-router.post("/createproject",projects.createProject);
-router.get("/allprojects",projects.retriveAllProjects);
-router.post("/singleproject",projects.retriveSingleProject);
-router.post("/filterproject",projects.filterProject);
-router.put("/updateproject/:id",projects.updateProject);
-router.delete("/deleteproject/:id",projects.deleteProject);
+router.post("/createproject",authenticator,projects.createProject);
+router.get("/allprojects",authenticator,projects.retriveAllProjects);
+router.post("/singleproject",authenticator,projects.retriveSingleProject);
+router.post("/filterproject",authenticator,projects.filterProject);
+router.put("/updateproject/:id",authenticator,projects.updateProject);
+router.delete("/deleteproject/:id",authenticator,projects.deleteProject);
 
 
 module.exports = router;

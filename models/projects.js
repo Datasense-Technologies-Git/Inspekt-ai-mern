@@ -4,6 +4,7 @@ const dataSchema = new mongoose.Schema({
     project_name:{
         type:String,
         required:true,
+        trim:true,
         
     },
     project_id:{
@@ -16,14 +17,14 @@ const dataSchema = new mongoose.Schema({
     },
     description:{
         type:String,
-        required:true
+        required:false
     },
     built_year:{
-        type:String,
+        type:Number,
         required:true
     },
     no_of_floors:{
-        type:String,
+        type:Number,
         required:true
     },
     street_1:{
@@ -32,7 +33,7 @@ const dataSchema = new mongoose.Schema({
     },
     street_2:{
         type:String,
-        required:true
+        required:false,
     },
     city:{
         type:String,
@@ -49,6 +50,9 @@ const dataSchema = new mongoose.Schema({
     country:{
         type:String,
         required:true
-    }
+    },
+    n_Status: { type: Number, default: 1 },
+    n_Deleted: { type: Number, default: 1 },
+    dt_CreatedOn: { type: Date, default: Date.now },
 })
 module.exports=mongoose.model('projects',dataSchema);
