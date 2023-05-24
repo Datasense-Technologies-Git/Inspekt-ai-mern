@@ -3,7 +3,7 @@ var validator = require("validator");
 const dataSchema = new mongoose.Schema({
     project_name:{
         type:String,
-        required:true,
+        required:[true, "Project name required"],
         trim:true,
         
     },
@@ -15,6 +15,7 @@ const dataSchema = new mongoose.Schema({
         type:String,
         required:true
     },
+
     description:{
         type:String,
         required:false

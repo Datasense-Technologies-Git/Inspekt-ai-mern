@@ -33,7 +33,7 @@ const createProject = async (req, res) => {
                 state: req.body.state,
             })
             
-            if (userdata.project_name.length === 0 || userdata.project_id.length === 0 || userdata.cust_name.length === 0 || userdata.description.length === 0 || userdata.built_year.length === 0 || userdata.no_of_floors.length === 0 || userdata.street_1.length === 0 || userdata.street_2.length === 0 || userdata.city.length === 0 || userdata.zipcode.length === 0 || userdata.country.length === 0 || userdata.state.length === 0) {
+            if (userdata.project_name.length === 0 || userdata.project_id.length === 0 || userdata.cust_name.length === 0 ||  userdata.built_year.length === 0 || userdata.no_of_floors.length === 0 || userdata.street_1.length === 0 || userdata.city.length === 0 || userdata.zipcode.length === 0 || userdata.country.length === 0 || userdata.state.length === 0) {
                 appData["status"] = 200;
                 appData["message"] = "Please fill all the fields";
                 appData["data"] = [];
