@@ -26,8 +26,6 @@ const createCustomer = async (req, res) => {
                 password: req.body.password,
                 customer_name: req.body.customer_name,
                 customer_email: req.body.customer_email,
-
-
             })
 
             if (user_name.length === 0) {
