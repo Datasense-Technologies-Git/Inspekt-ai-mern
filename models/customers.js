@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 var validator = require("validator");
 const shortid = require('shortid');
-const dataSchema = new mongoose.Schema({
+const customerSchema = new mongoose.Schema({
     user_name:{
         type:String,
         required:[true, "Customer name is required"],
@@ -34,4 +34,4 @@ const dataSchema = new mongoose.Schema({
     n_Deleted: { type: Number, default: 1 },
     dt_CreatedOn: { type: Date, default: Date.now },
 })
-module.exports=mongoose.model('customers',dataSchema);
+module.exports=mongoose.model('customers',customerSchema);

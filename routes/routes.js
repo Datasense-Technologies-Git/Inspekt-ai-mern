@@ -5,8 +5,8 @@ var router = express.Router();
 var UserController = require("../controllers/user");
 var InspectionController = require("../controllers/inspectionsController")
 var projects = require("../controllers/projects")
-const authenticator = require("../middleware/auth");
 var customers = require("../controllers/customers");
+const authenticator = require("../middleware/auth");
 
 // a simple test url to check that all of our files are communicating correctly.
 router.post("/register", UserController.register);
@@ -23,12 +23,6 @@ router.post("/filterproject",authenticator,projects.filterProject);
 router.put("/updateproject/:id",authenticator,projects.updateProject);
 router.delete("/deleteproject/:id",authenticator,projects.deleteProject);
 
-// customer creating routes
 router.post("/createCustomer",authenticator, customers.createCustomer);
-router.get("/customersList",authenticator, customers.getAllCustomers);
-router.post("/getSigleCustomer",authenticator, customers.getSingleCustomer);
-router.post("/customerByFilter",authenticator, customers.filterCustomer);
-router.delete("/deleteCustomer/:id",authenticator, customers.deleteCustomer);
-
 
 module.exports = router;
