@@ -4,12 +4,18 @@ const dataSchema = new mongoose.Schema({
     project_name:{
         type:String,
         required:[true, "Project name required"],
+        validate(value) {
+            if (!validator.isLength(value, { min: 3, max: 64 })) {
+              throw Error("Length of the username should be between 3-64");
+            }
+          },
         trim:true,
         
     },
     project_id:{
         type:String,
-        required:true
+        required:true,
+       
     },
     cust_name:{
         type:String,

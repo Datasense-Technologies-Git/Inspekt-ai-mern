@@ -38,6 +38,7 @@ const upload = multer({
 }).single("image");
 
 const createProject = async (req, res) => {
+  
   try {
     upload(req, res, async (err) => {
       const checkProjectName = await dataSchema.findOne({
@@ -46,43 +47,66 @@ const createProject = async (req, res) => {
       const checkProjectId = await dataSchema.findOne({
         project_id: req.body.project_id,
       });
+      
 
       if (checkProjectName || checkProjectId) {
         appData["status"] = 200;
         appData["message"] = "Project already exist";
         appData["data"] = [];
         appData["error"] = [];
+        res.send(appData)
+        
+
       } else if (!err) {
+        
+        const {project_name,project_id,cust_name,description,built_year,no_of_floors,street_1,street_2,city,zipcode,country,state} = req.body;
         const userdata = new dataSchema({
-          project_name: req.body.project_name,
-          project_id: req.body.project_id,
-          cust_name: req.body.cust_name,
-          description: req.body.description,
-          built_year: req.body.built_year,
-          no_of_floors: req.body.no_of_floors,
-          street_1: req.body.street_1,
-          street_2: req.body.street_2,
-          city: req.body.city,
-          zipcode: req.body.zipcode,
-          country: req.body.country,
-          state: req.body.state,
-        });
+            project_name,
+            project_id,
+            cust_name,
+            description,
+            built_year,
+            no_of_floors,
+            street_1,
+            street_2,
+            city,
+            zipcode,
+            country,
+            state,
+          });
+       
         if(req.file){
           userdata.image = req.file.path;
         }
 
-        if (userdata.project_name.length === 0 || userdata.project_id.length === 0 || userdata.cust_name.length === 0 ||  userdata.built_year.length === 0 || userdata.no_of_floors.length === 0 || userdata.street_1.length === 0 || userdata.city.length === 0 || userdata.zipcode.length === 0 || userdata.country.length === 0 || userdata.state.length === 0) {
+        if (userdata.project_id.length === 0 || userdata.cust_name.length === 0 ||  userdata.built_year.length === 0 || userdata.no_of_floors.length === 0 || userdata.street_1.length === 0 || userdata.city.length === 0 || userdata.zipcode.length === 0 || userdata.country.length === 0 || userdata.state.length === 0) {
             appData["status"] = 200;
             appData["message"] = "Please fill all the fields";
             appData["data"] = [];
             appData["error"] = [];
+             res.send(appData)
+
         }
         else {
-        const user = await userdata.save();
-        appData["status"] = 200;
+
+
+         userdata.save(function(err,next){
+          if(err){
+            appData["status"] = 200;
+            appData["message"] = "some error";
+            appData["data"] = [];
+            appData["error"] = err.message;
+             res.send(appData)
+          }
+          else{
+            appData["status"] = 200;
         appData["message"] = "Your project added Successfully";
-        appData["data"] = [user];
+        appData["data"] = next;
         appData["error"] = [];
+         res.send(appData)
+          }
+         });
+          
 
         }
       } else {
@@ -91,7 +115,7 @@ const createProject = async (req, res) => {
         appData["data"] = [];
         appData["error"] = [err];
       }
-      res.json(appData);
+      // res.json(appData);
     });
   } catch (error) {
     appData["status"] = 200;
