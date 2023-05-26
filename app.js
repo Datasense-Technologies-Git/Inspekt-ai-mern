@@ -23,5 +23,5 @@ app.listen(PORT, () => {
 });
 
 app.use("/ins/user", userRoutes);
-
+app.use("/upload-images",express.static("upload-images"));
 // app.use("/api/ins/customer", customerRoute);

@@ -1,5 +1,6 @@
 const dataSchema = require("../models/projects");
 const multer = require("multer");
+const path = require('path');
 
 var appData = {
   status: 0,
@@ -9,14 +10,31 @@ var appData = {
 };
 
 const storage = multer.diskStorage({
-  destination: "newuploads",
+  destination: "upload-images",
   filename: (req, file, cb) => {
-    cb(null, file.originalname);
+    cb(null, file.originalname.replace(/\.[^/.]+$/,"")+'_'+Date.now()+ path.extname(file.originalname));
   },
 });
 
+let maxSize = 2*1000*1000;
+
 const upload = multer({
   storage: storage,
+  limits:{
+    fileSize:maxSize
+  },
+  fileFilter: function(req,file,cb){
+    let fileTypes = /jpeg|jpg|png/;
+    let mimeTypes = fileTypes.test(file.mimetype);
+    let extName = fileTypes.test(path.extname(file.originalname).toLowerCase());
+
+    if(mimeTypes && extName){ 
+      return cb(null,true);
+    }
+    
+    cb("Error: File accepts only "+fileTypes)
+
+  }
 }).single("image");
 
 const createProject = async (req, res) => {
@@ -39,10 +57,6 @@ const createProject = async (req, res) => {
           project_name: req.body.project_name,
           project_id: req.body.project_id,
           cust_name: req.body.cust_name,
-          image: {
-            data: req.file.filename,
-            contentType: "image/png",
-          },
           description: req.body.description,
           built_year: req.body.built_year,
           no_of_floors: req.body.no_of_floors,
@@ -53,6 +67,9 @@ const createProject = async (req, res) => {
           country: req.body.country,
           state: req.body.state,
         });
+        if(req.file){
+          userdata.image = req.file.path;
+        }
 
         if (userdata.project_name.length === 0 || userdata.project_id.length === 0 || userdata.cust_name.length === 0 ||  userdata.built_year.length === 0 || userdata.no_of_floors.length === 0 || userdata.street_1.length === 0 || userdata.city.length === 0 || userdata.zipcode.length === 0 || userdata.country.length === 0 || userdata.state.length === 0) {
             appData["status"] = 200;
@@ -71,7 +88,7 @@ const createProject = async (req, res) => {
       } else {
         appData["status"] = 200;
         appData["message"] = "Received some error !";
-        appData["data"] = user;
+        appData["data"] = [];
         appData["error"] = [err];
       }
       res.json(appData);
