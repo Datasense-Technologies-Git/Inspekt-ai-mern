@@ -15,14 +15,17 @@ const dataSchema = new mongoose.Schema({
         type:String,
         required:true
     },
-
+    image: {
+        data: Buffer,
+        contentType: String
+      },
     description:{
         type:String,
         required:false
     },
     built_year:{
         type:Number,
-        required:true
+        required:[true, "must be a number"],
     },
     no_of_floors:{
         type:Number,

@@ -9,7 +9,8 @@ app.use(bodyParser.json({ limit: "150mb", extended: true }));
 app.use(bodyParser.urlencoded({ limit: "150mb", extended: true }));
 const userRoutes = require("./routes/routes");
 
-const PORT = process.env.PORT || 3002;
+
+const PORT = process.env.PORT || 3002; 
 app.get('/',(req,res) => {
   res.status(200).json({
     message:'Inspekt Ai Server working fine'
@@ -20,3 +21,4 @@ app.listen(PORT, () => {
 });
 
 app.use("/ins/user", userRoutes);
+
