@@ -214,9 +214,14 @@ const updateProject = async (req, res) => {
 
 const deleteProject = async (req, res) => {
   try {
-    const removeData = await dataSchema.findOneAndDelete({
-      project_id: req.params.id,
-    });
+    // const removeData = await dataSchema.findOneAndDelete({
+    //   project_id: req.params.id,
+    // });
+    const id = { project_id: req.params.id };
+    const updatedData = {n_Deleted:req.body.n_Deleted}
+    const options = { new: true };
+
+    const removeData = await dataSchema.findOneAndUpdate(id, updatedData, options);
     if (removeData) {
       appData["status"] = 200;
       appData["message"] = "Your Project deleted";
@@ -224,7 +229,7 @@ const deleteProject = async (req, res) => {
       appData["error"] = [];
     } else {
       appData["status"] = 200;
-      appData["message"] = "Your project not deleted";
+      appData["message"] = "no projects found for this ID";
       appData["data"] = [];
       appData["error"] = [];
     }
@@ -233,7 +238,7 @@ const deleteProject = async (req, res) => {
     appData["status"] = 200;
     appData["message"] = "Sorry, Something went wrong";
     appData["data"] = [];
-    appData["error"] = [error];
+    appData["error"] = error;
     res.json(appData);
   }
 };

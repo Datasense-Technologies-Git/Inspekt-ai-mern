@@ -15,50 +15,61 @@ const dataSchema = new mongoose.Schema({
     project_id:{
         type:String,
         required:true,
+        trim:true,
        
     },
     cust_name:{
         type:String,
-        required:true
+        required:true,
+        trim:true,
     },
     image: {
         type: String
       },
     description:{
         type:String,
-        required:false
+        required:false,
+        trim:true,
     },
     built_year:{
         type:Number,
         required:[true, "must be a number"],
+        trim:true,
     },
     no_of_floors:{
         type:Number,
-        required:true
+        required:true,
+        trim:true,
     },
     street_1:{
         type:String,
-        required:true
+        required:true,
+        trim:true,
     },
     street_2:{
         type:String,
         required:false,
+        trim:true,
     },
     city:{
         type:String,
-        required:true
+        required:true,
+        trim:true,
     },
     zipcode:{
         type:String,
-        required:true
+        required:true,
+        trim:true,
     },
     state:{
         type:String,
-        required:true
+        required:true,
+        trim:true,
     },
     country:{
         type:String,
-        required:true
+        required:true,
+        trim:true,
     },
     n_Status: { type: Number, default: 1 },
     n_Deleted: { type: Number, default: 1 },
