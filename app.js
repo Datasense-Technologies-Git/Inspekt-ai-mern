@@ -1,9 +1,11 @@
 var express = require("express");
+const mongoose = require("mongoose");
 var bodyParser = require("body-parser");
 require("./db");
 var app = express();
 
 var cors = require("cors");
+mongoose.set('useFindAndModify', false);
 app.use(cors());
 app.use(bodyParser.json({ limit: "150mb", extended: true }));
 app.use(bodyParser.urlencoded({ limit: "150mb", extended: true }));

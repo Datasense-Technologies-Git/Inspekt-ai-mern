@@ -22,6 +22,7 @@ router.post("/singleproject",authenticator,projects.retriveSingleProject);
 router.post("/filterproject",authenticator,projects.filterProject);
 router.put("/updateproject/:id",authenticator,projects.updateProject);
 router.put("/deleteproject/:id",authenticator,projects.deleteProject);
+router.post("/searchproject",authenticator,projects.searchProject);
 
 router.post("/createCustomer",authenticator, customers.createCustomer);
 
