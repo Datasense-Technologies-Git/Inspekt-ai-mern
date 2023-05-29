@@ -119,6 +119,7 @@ const createProject = async (req, res) => {
               appData["message"] = "some error";
               appData["data"] = [];
               appData["error"] = err.message;
+              
               res.send(appData);
             } else {
               appData["status"] = 200;
@@ -131,13 +132,23 @@ const createProject = async (req, res) => {
           });
         }
       } else {
-        appData["status"] = 404;
+        if ( err instanceof multer.MulterError && err.code === "LIMIT_FILE_SIZE") {
+          appData["status"] = 404;
+        appData["appStatusCode"] = 2;
+        appData["message"] = "Received some error !";
+        appData["data"] = [];
+        appData["error"] = "File Size too large";
+        res.json(appData);
+        } else {
+          appData["status"] = 404;
         appData["appStatusCode"] = 2;
         appData["message"] = "Received some error !";
         appData["data"] = [];
         appData["error"] = err;
+        res.json(appData);
+        }
+        
       }
-      // res.json(appData);
     });
   } catch (error) {
     appData["status"] = 404;
@@ -183,6 +194,7 @@ const retriveSingleProject = async (req, res) => {
     const singleproject = await dataSchema.findOne({
       project_id: req.body.project_id,
     });
+    console.log(singleproject);
     if (singleproject) {
       appData["status"] = 200;
       appData["appStatusCode"] = 0;
@@ -221,29 +233,33 @@ const updateProject = async (req, res) => {
       if (req.file) {
         updatedData.image = req.file.path;
       }
-      const result = await dataSchema.findOneAndUpdate(
+      const dataResult = dataSchema.findOneAndUpdate(
         id,
         updatedData,
         options
       );
+      console.log(dataResult);
+      if (dataResult) {
+        dataResult.save(function (err, next) {
+          if (err) {
+            appData["status"] = 400;
+            appData["appStatusCode"] = 2;
+            appData["message"] = "some error";
+            appData["data"] = [];
+            appData["error"] = err.message;
+            res.send(appData);
+          } else {
+            appData["status"] = 200;
+            appData["appStatusCode"] = 0;
+            appData["message"] = "Successfully Updated";
+            appData["data"] = next;
+            appData["error"] = [];
+            res.send(appData);
+          }
+        });
+      }
 
-      await result.save(function (err, next) {
-        if (err) {
-          appData["status"] = 400;
-          appData["appStatusCode"] = 2;
-          appData["message"] = "some error";
-          appData["data"] = [];
-          appData["error"] = err.message;
-          res.send(appData);
-        } else {
-          appData["status"] = 200;
-          appData["appStatusCode"] = 0;
-          appData["message"] = "Successfully Updated";
-          appData["data"] = next;
-          appData["error"] = [];
-          res.send(appData);
-        }
-      });
+       
     });
   } catch (error) {
     appData["status"] = 404;
