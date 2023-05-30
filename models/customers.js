@@ -7,13 +7,10 @@ const customerSchema = new mongoose.Schema({
         required:[true, "Customer name is required"],
         trim:true,
     },
-    user_id:{
+    customer_id:{
         type:String,
-        required:true
-    },
-    customer_name:{
-        type:String,
-        required:true
+        required:true,
+        trim:true,
     },
     password: {
         type: String,
@@ -26,8 +23,13 @@ const customerSchema = new mongoose.Schema({
         trim: true,
         timestamp : true
       },
+      customer_name:{
+          type:String,
+          required:true,
+          trim:true,
+      },
       customer_email:{
-        type:Number,
+        type:String,
         required:true
     },
     n_Status: { type: Number, default: 1 },

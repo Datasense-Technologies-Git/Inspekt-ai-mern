@@ -119,7 +119,7 @@ const createProject = async (req, res) => {
               appData["message"] = "some error";
               appData["data"] = [];
               appData["error"] = err.message;
-              
+
               res.send(appData);
             } else {
               appData["status"] = 200;
@@ -132,22 +132,24 @@ const createProject = async (req, res) => {
           });
         }
       } else {
-        if ( err instanceof multer.MulterError && err.code === "LIMIT_FILE_SIZE") {
+        if (
+          err instanceof multer.MulterError &&
+          err.code === "LIMIT_FILE_SIZE"
+        ) {
           appData["status"] = 404;
-        appData["appStatusCode"] = 2;
-        appData["message"] = "Received some error !";
-        appData["data"] = [];
-        appData["error"] = "File Size too large";
-        res.json(appData);
+          appData["appStatusCode"] = 2;
+          appData["message"] = "Received some error !";
+          appData["data"] = [];
+          appData["error"] = "File Size too large";
+          res.json(appData);
         } else {
           appData["status"] = 404;
-        appData["appStatusCode"] = 2;
-        appData["message"] = "Received some error !";
-        appData["data"] = [];
-        appData["error"] = err;
-        res.json(appData);
+          appData["appStatusCode"] = 2;
+          appData["message"] = "Received some error !";
+          appData["data"] = [];
+          appData["error"] = err;
+          res.json(appData);
         }
-        
       }
     });
   } catch (error) {
@@ -228,7 +230,7 @@ const updateProject = async (req, res) => {
     upload(req, res, async (err) => {
       const id = { project_id: req.params.id };
       const updatedData = req.body;
-      const options = { new: true,useFindAndModify: false };
+      const options = { new: true, useFindAndModify: false };
 
       if (req.file) {
         updatedData.image = req.file.path;
@@ -238,7 +240,7 @@ const updateProject = async (req, res) => {
         updatedData,
         options
       );
-       result.save(function (err, next) {
+      result.save(function (err, next) {
         if (err) {
           appData["status"] = 400;
           appData["appStatusCode"] = 2;
@@ -306,8 +308,35 @@ const deleteProject = async (req, res) => {
 
 const filterProject = async (req, res) => {
   try {
-    const allprojects = await dataSchema.find({});
     const projectNameList = req.body.project_name;
+    console.log(projectNameList ,'-------- projectNameList');
+
+    if (projectNameList.length > 0) {
+      console.log('--------- 1');
+      
+      var newFilters2 = [];
+      var newFilters = [];
+      let final;
+      let verify =  projectNameList.map( async (data) => {
+        console.log('--------- 2');
+        
+        const fills = await dataSchema.findOne(
+          { project_name: { $regex: data, $options: "i" } });
+          console.log('------- 5');
+          console.log(fills ,'------- fills ');
+          if(fills !== null){
+            console.log('------- 4');
+            newFilters = [...newFilters,fills];
+          }
+          
+      });
+      console.log(newFilters ,'------- newFilters2 ');
+      console.log('------- 3');
+      
+     
+    }
+    
+    const allprojects = await dataSchema.find({});
 
     if (allprojects.length > 0) {
       if (projectNameList.length > 0) {
@@ -321,20 +350,20 @@ const filterProject = async (req, res) => {
         });
         if (filteredAns.length > 0) {
           appData["status"] = 200;
-        appData["appStatusCode"] = 0;
-        appData["message"] = "Your filtered results";
-        appData["data"] = filteredAns;
-        appData["error"] = [];
+          appData["appStatusCode"] = 0;
+          appData["message"] = "Your filtered results";
+          appData["data"] = filteredAns;
+          appData["error"] = [];
 
-        res.json(appData);
+          res.json(appData);
         } else {
           appData["status"] = 200;
-        appData["appStatusCode"] = 0;
-        appData["message"] = "You don't have any projects for this filter";
-        appData["data"] = [];
-        appData["error"] = [];
+          appData["appStatusCode"] = 0;
+          appData["message"] = "You don't have any projects for this filter";
+          appData["data"] = [];
+          appData["error"] = [];
 
-        res.json(appData);
+          res.json(appData);
         }
       } else {
         appData["status"] = 200;
@@ -369,35 +398,36 @@ const searchProject = async (req, res) => {
   try {
     const search = req.body.project_name;
     if (search.length >= 3) {
-      const searchAnswers = await dataSchema.find({ project_name: { $regex: search, $options: "i" } })
-    
-    if (searchAnswers.length > 0) {
-      appData["status"] = 200;
-    appData["appStatusCode"] = 0;
-    appData["message"] = "Your search results are below";
-    appData["data"] = searchAnswers;
-    appData["error"] = [];
+      const searchAnswers = await dataSchema.find({
+        project_name: { $regex: search, $options: "i" },
+      });
 
-    res.json(appData);
+      if (searchAnswers.length > 0) {
+        appData["status"] = 200;
+        appData["appStatusCode"] = 0;
+        appData["message"] = "Your search results are below";
+        appData["data"] = searchAnswers;
+        appData["error"] = [];
+
+        res.json(appData);
+      } else {
+        appData["status"] = 200;
+        appData["appStatusCode"] = 0;
+        appData["message"] = "No projects found for your search";
+        appData["data"] = [];
+        appData["error"] = [];
+
+        res.json(appData);
+      }
     } else {
       appData["status"] = 200;
-    appData["appStatusCode"] = 0;
-    appData["message"] = "No projects found for your search";
-    appData["data"] = [];
-    appData["error"] = [];
+      appData["appStatusCode"] = 0;
+      appData["message"] = "Min 3 characters required for your search";
+      appData["data"] = [];
+      appData["error"] = [];
 
-    res.json(appData);
+      res.json(appData);
     }
-    } else {
-      appData["status"] = 200;
-    appData["appStatusCode"] = 0;
-    appData["message"] = "Min 3 characters required for your search";
-    appData["data"] = [];
-    appData["error"] = [];
-
-    res.json(appData);
-    }
-    
   } catch (error) {
     appData["status"] = 404;
     appData["appStatusCode"] = 2;
@@ -415,5 +445,5 @@ module.exports = {
   filterProject,
   updateProject,
   deleteProject,
-  searchProject
+  searchProject,
 };

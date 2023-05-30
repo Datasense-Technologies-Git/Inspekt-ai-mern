@@ -24,6 +24,8 @@ router.put("/updateproject/:id",authenticator,projects.updateProject);
 router.put("/deleteproject/:id",authenticator,projects.deleteProject);
 router.post("/searchproject",authenticator,projects.searchProject);
 
-router.post("/createCustomer",authenticator, customers.createCustomer);
+router.post("/createcustomer",authenticator, customers.createCustomer);
+router.get("/allcustomers",authenticator, customers.getAllCustomers);
+router.post("/singlecustomer",authenticator, customers.getSingleCustomer);
 
 module.exports = router;
