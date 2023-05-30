@@ -4,7 +4,7 @@ const shortid = require('shortid');
 const customerSchema = new mongoose.Schema({
     user_name:{
         type:String,
-        required:[true, "Customer name is required"],
+        required:[true, "Username is required"],
         trim:true,
     },
     customer_id:{
@@ -25,14 +25,16 @@ const customerSchema = new mongoose.Schema({
       },
       customer_name:{
           type:String,
-          required:true,
+          required:[true, "Customer name is required"],
           trim:true,
+          unique: true,
+          lowercase: true,
       },
       customer_email:{
         type:String,
-        required:true
+        required:true,
     },
-    n_Status: { type: Number, default: 1 },
+    n_Status: { type: Number,required:true, default: 1 },
     n_Deleted: { type: Number, default: 1 },
     dt_CreatedOn: { type: Date, default: Date.now },
 })

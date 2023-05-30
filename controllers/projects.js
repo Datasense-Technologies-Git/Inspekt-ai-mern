@@ -240,7 +240,7 @@ const updateProject = async (req, res) => {
         updatedData,
         options
       );
-      result.save(function (err, next) {
+      result.save(function (err, data) {
         if (err) {
           appData["status"] = 400;
           appData["appStatusCode"] = 2;
@@ -252,7 +252,7 @@ const updateProject = async (req, res) => {
           appData["status"] = 200;
           appData["appStatusCode"] = 0;
           appData["message"] = "Successfully Updated";
-          appData["data"] = next;
+          appData["data"] = data;
           appData["error"] = [];
           res.send(appData);
         }
