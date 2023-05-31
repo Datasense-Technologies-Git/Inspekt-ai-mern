@@ -1,4 +1,5 @@
 const customerSchema = require('../models/customers');
+const util = require('../helper/util')
 const shortid = require("shortid");
 const bcrypt = require("bcryptjs");
 
@@ -21,7 +22,7 @@ const createCustomer = async (req, res) => {
           const checkEmail = await customerSchema.findOne({
             customer_email: req.body.customer_email,
           });
-
+          // console.log(util.emailRegexp());
           if (checkUserName || checkCustomerName || checkEmail) {
             appData["status"] = 200;
             appData["appStatusCode"] = 0;
@@ -55,6 +56,7 @@ const createCustomer = async (req, res) => {
                   appData["error"] = err.message;
     
                   res.send(appData);
+                  console.log(util.emailRegexp());
                 } else {
                   appData["status"] = 200;
                   appData["appStatusCode"] = 0;
@@ -140,47 +142,52 @@ const getSingleCustomer = async (req, res) => {
     }
 }
 
+
+
+
 const updateCustomer = async (req, res) => {
     try {
         const id = {customer_id:req.params.id}
         const updatedData = req.body;
         const options = { new: true };
         delete updatedData.password; 
+        delete updatedData.n_Status; 
+        delete updatedData.n_Deleted; 
 
-        const checkUserName = await customerSchema.findOne({
-            user_name: updatedData.user_name,
-          });
-          const checkCustomerName = await customerSchema.findOne({
-            customer_name: updatedData.customer_name,
-          });
-          const checkEmail = await customerSchema.findOne({
-            customer_email: updatedData.customer_email,
-          });
-          if (checkUserName) {
-            appData["status"] = 200;
-            appData["appStatusCode"] = 0;
-            appData["message"] = "Sorry.. Username already exist";
-            appData["data"] = [];
-            appData["error"] = [];
-            res.send(appData);
-          } 
-          else if (checkCustomerName) {
-            appData["status"] = 200;
-            appData["appStatusCode"] = 0;
-            appData["message"] = "Sorry.. Customer name already exist";
-            appData["data"] = [];
-            appData["error"] = [];
-            res.send(appData);
-          } 
-          else if (checkEmail) {
-            appData["status"] = 200;
-            appData["appStatusCode"] = 0;
-            appData["message"] = "Sorry.. Email already exist";
-            appData["data"] = [];
-            appData["error"] = [];
-            res.send(appData);
-          } 
-          else{
+        // const checkUserName = await customerSchema.findOne({
+        //     user_name: updatedData.user_name,
+        //   });
+        //   const checkCustomerName = await customerSchema.findOne({
+        //     customer_name: updatedData.customer_name,
+        //   });
+        //   const checkEmail = await customerSchema.findOne({
+        //     customer_email: updatedData.customer_email,
+        //   });
+        //   if (checkUserName) {
+        //     appData["status"] = 200;
+        //     appData["appStatusCode"] = 0;
+        //     appData["message"] = "Sorry.. Username already exist";
+        //     appData["data"] = [];
+        //     appData["error"] = [];
+        //     res.send(appData);
+        //   } 
+        //   else if (checkCustomerName) {
+        //     appData["status"] = 200;
+        //     appData["appStatusCode"] = 0;
+        //     appData["message"] = "Sorry.. Customer name already exist";
+        //     appData["data"] = [];
+        //     appData["error"] = [];
+        //     res.send(appData);
+        //   } 
+        //   else if (checkEmail) {
+        //     appData["status"] = 200;
+        //     appData["appStatusCode"] = 0;
+        //     appData["message"] = "Sorry.. Email already exist";
+        //     appData["data"] = [];
+        //     appData["error"] = [];
+        //     res.send(appData);
+        //   } 
+        //   else{
             const result = await customerSchema.findOneAndUpdate(
                 id, updatedData, options
             )
@@ -201,9 +208,7 @@ const updateCustomer = async (req, res) => {
                   res.send(appData);
                 }
               });
-          }
-
-        
+          // }
     } catch (error) {
         appData["status"] = 400;
         appData["appStatusCode"] = 2;
@@ -216,29 +221,53 @@ const updateCustomer = async (req, res) => {
 
 const deleteCustomer = async(req,res)=>{
     try {
-        const id = { customer_id: req.params.id };
-        const updatedData = { n_Deleted: req.body.n_Deleted };
-        const options = { new: true };
-    
-        const removeData = await customerSchema.findOneAndUpdate(
-          id,
-          updatedData,
-          options
-        );
-        if (removeData) {
-          appData["status"] = 200;
+        if (req.body.n_Deleted === 0 || req.body.n_Deleted === 1) {
+          const singleCustomer = await customerSchema.findOne({ customer_id: req.params.id });
+          if(singleCustomer.n_Deleted == 0){
+            appData["status"] = 200;
           appData["appStatusCode"] = 0;
-          appData["message"] = "Your customer deleted";
-          appData["data"] = removeData;
+          appData["message"] = "Your customer already deleted";
+          appData["data"] = [];
           appData["error"] = [];
+        
+        res.json(appData);
+          }
+          else{
+            const id = { customer_id: req.params.id };
+            const updatedData = { n_Deleted: req.body.n_Deleted };
+            const options = { new: true };
+            
+            const removeData = await customerSchema.findOneAndUpdate(
+              id,
+              updatedData,
+              options
+            );
+            if (removeData) {
+              appData["status"] = 200;
+              appData["appStatusCode"] = 0;
+              appData["message"] = "Your customer deleted";
+              appData["data"] = removeData;
+              appData["error"] = [];
+            } else {
+              appData["status"] = 200;
+              appData["appStatusCode"] = 0;
+              appData["message"] = "no customer found for this ID";
+              appData["data"] = [];
+              appData["error"] = [];
+            }
+            res.json(appData);
+          }
+          
         } else {
           appData["status"] = 200;
           appData["appStatusCode"] = 0;
-          appData["message"] = "no customer found for this ID";
+          appData["message"] = "Invalid code. The code should be 0 (or) 1";
           appData["data"] = [];
           appData["error"] = [];
-        }
+        
         res.json(appData);
+        }
+        
       } catch (error) {
         appData["status"] = 404;
         appData["appStatusCode"] = 2;
@@ -251,21 +280,13 @@ const deleteCustomer = async(req,res)=>{
 
 const customerStatus = async(req,res)=>{
     try {
-        
-        if(req.body.n_Status !== 0 || req.body.n_Status !== 1){
-          appData["status"] = 200;
-            appData["appStatusCode"] = 0;
-            appData["message"] = "Invalid customer status code";
-            appData["data"] = [];
-            appData["error"] = [];
+      console.log(req.body.n_Status);
+        if(req.body.n_Status === 0 || req.body.n_Status === 1){
           
-          res.json(appData);
-        }
-        else{
           const id = { customer_id: req.params.id };
           const updatedData = { n_Status: req.body.n_Status };
           const options = { new: true };
-      
+          
           const removeData = await customerSchema.findOneAndUpdate(
             id,
             updatedData,
@@ -275,13 +296,13 @@ const customerStatus = async(req,res)=>{
             if (req.body.n_Status === 0) {
               appData["status"] = 200;
             appData["appStatusCode"] = 0;
-            appData["message"] = "Customer Deactivated successfully";
+            appData["message"] = "Customer Deactivated";
             appData["data"] = removeData;
             appData["error"] = [];
             } else {
               appData["status"] = 200;
             appData["appStatusCode"] = 0;
-            appData["message"] = "Customer Activated successfully";
+            appData["message"] = "Customer Activated";
             appData["data"] = removeData;
             appData["error"] = [];
             }
@@ -289,17 +310,25 @@ const customerStatus = async(req,res)=>{
           } else {
             appData["status"] = 200;
             appData["appStatusCode"] = 0;
-            appData["message"] = "no customer found for this ID";
+            appData["message"] = " Invalid Id (or) no customer found for this ID";
             appData["data"] = [];
             appData["error"] = [];
           }
           res.json(appData);
-
-
-          
+        }
+        else{
+          console.log('---------- 2');
+          appData["status"] = 200;
+          appData["appStatusCode"] = 0;
+          appData["message"] = "Invalid customer status code";
+          appData["data"] = [];
+          appData["error"] = [];
+        
+        res.json(appData);
         }
         
       } catch (error) {
+        console.log('------- 3');
         appData["status"] = 404;
         appData["appStatusCode"] = 2;
         appData["message"] = "Sorry, Something went wrong";

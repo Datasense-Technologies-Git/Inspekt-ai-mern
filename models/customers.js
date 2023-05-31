@@ -6,11 +6,14 @@ const customerSchema = new mongoose.Schema({
         type:String,
         required:[true, "Username is required"],
         trim:true,
+        lowercase: true,
+        unique: true,
     },
     customer_id:{
         type:String,
         required:true,
         trim:true,
+        unique: true,
     },
     password: {
         type: String,
@@ -33,6 +36,9 @@ const customerSchema = new mongoose.Schema({
       customer_email:{
         type:String,
         required:true,
+        trim:true,
+        lowercase: true,
+        unique: true,
     },
     n_Status: { type: Number,required:true, default: 1 },
     n_Deleted: { type: Number, default: 1 },
