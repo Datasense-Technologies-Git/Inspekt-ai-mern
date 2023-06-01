@@ -31,6 +31,6 @@ router.put("/updatecustomer/:id",authenticator, customers.updateCustomer);
 router.put("/deletecustomer/:id",authenticator, customers.deleteCustomer);
 router.put("/customerstatus/:id",authenticator, customers.customerStatus);
 router.post("/searchcustomer",authenticator,customers.searchCustomer);
-
+router.post("/filtercustomer",authenticator,customers.filterCustomer);
 
 module.exports = router;

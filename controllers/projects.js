@@ -94,24 +94,24 @@ const createProject = async (req, res) => {
           userdata.image = req.file.path;
         }
 
-        if (
-          userdata.project_id.length === 0 ||
-          userdata.cust_name.length === 0 ||
-          userdata.built_year.length === 0 ||
-          userdata.no_of_floors.length === 0 ||
-          userdata.street_1.length === 0 ||
-          userdata.city.length === 0 ||
-          userdata.zipcode.length === 0 ||
-          userdata.country.length === 0 ||
-          userdata.state.length === 0
-        ) {
-          appData["status"] = 200;
-          appData["appStatusCode"] = 0;
-          appData["message"] = "Please fill all the fields";
-          appData["data"] = [];
-          appData["error"] = [];
-          res.send(appData);
-        } else {
+        // if (
+        //   userdata.project_id.length === 0 ||
+        //   userdata.cust_name.length === 0 ||
+        //   userdata.built_year.length === 0 ||
+        //   userdata.no_of_floors.length === 0 ||
+        //   userdata.street_1.length === 0 ||
+        //   userdata.city.length === 0 ||
+        //   userdata.zipcode.length === 0 ||
+        //   userdata.country.length === 0 ||
+        //   userdata.state.length === 0
+        // ) {
+        //   appData["status"] = 200;
+        //   appData["appStatusCode"] = 0;
+        //   appData["message"] = "Please fill all the fields";
+        //   appData["data"] = [];
+        //   appData["error"] = [];
+        //   res.send(appData);
+        // } else {
           userdata.save(function (err, next) {
             if (err) {
               appData["status"] = 400;
@@ -130,7 +130,7 @@ const createProject = async (req, res) => {
               res.send(appData);
             }
           });
-        }
+        // }
       } else {
         if (
           err instanceof multer.MulterError &&
@@ -141,14 +141,14 @@ const createProject = async (req, res) => {
           appData["message"] = "Received some error !";
           appData["data"] = [];
           appData["error"] = "File Size too large";
-          res.json(appData);
+          res.send(appData);
         } else {
           appData["status"] = 404;
           appData["appStatusCode"] = 2;
           appData["message"] = "Received some error !";
           appData["data"] = [];
           appData["error"] = err;
-          res.json(appData);
+          res.send(appData);
         }
       }
     });
@@ -158,7 +158,7 @@ const createProject = async (req, res) => {
     appData["message"] = "Oops, Something went wrong !";
     appData["data"] = [];
     appData["error"] = error;
-    res.json(appData);
+    res.send(appData);
   }
 };
 
@@ -171,14 +171,14 @@ const retriveAllProjects = async (req, res) => {
       appData["message"] = `You have totally ${allprojects.length} projects`;
       appData["data"] = allprojects;
       appData["error"] = [];
-      res.json(appData);
+      res.send(appData);
     } else {
       appData["status"] = 200;
       appData["appStatusCode"] = 0;
       appData["message"] = "Currently you don't have any projects";
       appData["data"] = allprojects;
       appData["error"] = [];
-      res.json(appData);
+      res.send(appData);
     }
   } catch (error) {
     appData["status"] = 404;
@@ -187,7 +187,7 @@ const retriveAllProjects = async (req, res) => {
     appData["data"] = [];
     appData["error"] = error;
 
-    res.json(appData);
+    res.send(appData);
   }
 };
 
@@ -196,7 +196,7 @@ const retriveSingleProject = async (req, res) => {
     const singleproject = await dataSchema.findOne({
       project_id: req.body.project_id,
     });
-    console.log(singleproject);
+    
     if (singleproject) {
       appData["status"] = 200;
       appData["appStatusCode"] = 0;
@@ -204,15 +204,15 @@ const retriveSingleProject = async (req, res) => {
       appData["data"] = singleproject;
       appData["error"] = [];
 
-      res.json(appData);
+      res.send(appData);
     } else {
       appData["status"] = 200;
       appData["appStatusCode"] = 0;
-      appData["message"] = "No results found (or) Invalid project_id";
+      appData["message"] = "No project found (or) Invalid project_id";
       appData["data"] = [];
       appData["error"] = [];
 
-      res.json(appData);
+      res.send(appData);
     }
   } catch (error) {
     appData["status"] = 404;
@@ -221,59 +221,106 @@ const retriveSingleProject = async (req, res) => {
     appData["data"] = [];
     appData["error"] = error;
 
-    res.json(appData);
+    res.send(appData);
   }
 };
 
 const updateProject = async (req, res) => {
   try {
     upload(req, res, async (err) => {
-      const id = { project_id: req.params.id };
-      const updatedData = req.body;
-      const options = { new: true, useFindAndModify: false };
-
+      
+      if (!err) {
+        const id = { project_id: req.params.id };
+        const updatedData = req.body;
+      const options = { new: true };
+      delete updatedData.n_Status; 
+      delete updatedData.n_Deleted;
       if (req.file) {
         updatedData.image = req.file.path;
       }
+      console.log(updatedData ,'------ updatedData');
       const result = await dataSchema.findOneAndUpdate(
         id,
         updatedData,
         options
       );
-      result.save(function (err, data) {
-        if (err) {
-          appData["status"] = 400;
+      
+     
+      if (result != null) {
+        result.save(function (err, data) {
+          if (err) {
+            console.log(err ,'------------');
+            appData["status"] = 400;
+            appData["appStatusCode"] = 2;
+            appData["message"] = "some error";
+            appData["data"] = [];
+            appData["error"] = err.message;
+            res.send(appData);
+          } else {
+            appData["status"] = 200;
+            appData["appStatusCode"] = 0;
+            appData["message"] = "Successfully Updated";
+            appData["data"] = data;
+            appData["error"] = [];
+            res.send(appData);
+          }
+        });
+      } else {
+        
+        appData["status"] = 200;
+            appData["appStatusCode"] = 0;
+            appData["message"] = "Invalid project id. Please check";
+            appData["data"] = [];
+            appData["error"] = [];
+            res.send(appData);
+      }
+      } else {
+        if (
+          err instanceof multer.MulterError &&
+          err.code === "LIMIT_FILE_SIZE"
+        ) {
+          appData["status"] = 404;
           appData["appStatusCode"] = 2;
-          appData["message"] = "some error";
+          appData["message"] = "Received some error !";
           appData["data"] = [];
-          appData["error"] = err.message;
+          appData["error"] = "File Size too large";
           res.send(appData);
         } else {
-          appData["status"] = 200;
-          appData["appStatusCode"] = 0;
-          appData["message"] = "Successfully Updated";
-          appData["data"] = data;
-          appData["error"] = [];
+          appData["status"] = 404;
+          appData["appStatusCode"] = 2;
+          appData["message"] = "Received some error !";
+          appData["data"] = [];
+          appData["error"] = err;
           res.send(appData);
         }
-      });
+      }
+      
     });
   } catch (error) {
+    console.log('----------- 2');
     appData["status"] = 404;
     appData["appStatusCode"] = 2;
     appData["message"] = "Something went wrong";
     appData["data"] = [];
     appData["error"] = error;
-    res.json(appData);
+    res.send(appData);
   }
 };
 
 const deleteProject = async (req, res) => {
   try {
-    // const removeData = await dataSchema.findOneAndDelete({
-    //   project_id: req.params.id,
-    // });
-    const id = { project_id: req.params.id };
+    if (req.body.n_Deleted === 0 || req.body.n_Deleted === 1) {
+      const singleProject = await dataSchema.findOne({ project_id: req.params.id });
+          if(singleProject.n_Deleted == 0){
+            appData["status"] = 200;
+          appData["appStatusCode"] = 0;
+          appData["message"] = "Your customer already deleted";
+          appData["data"] = [];
+          appData["error"] = [];
+        
+        res.send(appData);
+          } else {
+        const id = { project_id: req.params.id };
     const updatedData = { n_Deleted: req.body.n_Deleted };
     const options = { new: true };
 
@@ -291,71 +338,48 @@ const deleteProject = async (req, res) => {
     } else {
       appData["status"] = 200;
       appData["appStatusCode"] = 0;
-      appData["message"] = "no projects found for this ID";
+      appData["message"] = "Error while deleting. No project found for this ID";
       appData["data"] = [];
       appData["error"] = [];
     }
-    res.json(appData);
+    res.send(appData);
+      }
+    } else {
+      appData["status"] = 200;
+          appData["appStatusCode"] = 0;
+          appData["message"] = "Invalid code. The code should be 0 (or) 1";
+          appData["data"] = [];
+          appData["error"] = [];
+        
+        res.send(appData);
+    }
+    
   } catch (error) {
     appData["status"] = 404;
     appData["appStatusCode"] = 2;
     appData["message"] = "Sorry, Something went wrong";
     appData["data"] = [];
     appData["error"] = error;
-    res.json(appData);
+    res.send(appData);
   }
 };
 
 const filterProject = async (req, res) => {
   try {
     const projectNameList = req.body.project_name;
-    console.log(projectNameList ,'-------- projectNameList');
 
     if (projectNameList.length > 0) {
-      console.log('--------- 1');
       
-      var newFilters2 = [];
-      var newFilters = [];
-      let final;
-      let verify =  projectNameList.map( async (data) => {
-        console.log('--------- 2');
-        
-        const fills = await dataSchema.findOne(
-          { project_name: { $regex: data, $options: "i" } });
-          console.log('------- 5');
-          console.log(fills ,'------- fills ');
-          if(fills !== null){
-            console.log('------- 4');
-            newFilters = [...newFilters,fills];
-          }
-          
-      });
-      console.log(newFilters ,'------- newFilters2 ');
-      console.log('------- 3');
-      
-     
-    }
-    
-    const allprojects = await dataSchema.find({});
-
-    if (allprojects.length > 0) {
-      if (projectNameList.length > 0) {
-        let filteredAns = [];
-        projectNameList.map((p_name, index) => {
-          const filters = allprojects.filter((data) => {
-            if (data.project_name === p_name) {
-              filteredAns.push(data);
-            }
-          });
-        });
-        if (filteredAns.length > 0) {
+      const finalFilter = await dataSchema.find(
+        { project_name: { $in: projectNameList } });
+        if (finalFilter.length > 0) {
           appData["status"] = 200;
           appData["appStatusCode"] = 0;
           appData["message"] = "Your filtered results";
-          appData["data"] = filteredAns;
+          appData["data"] = finalFilter;
           appData["error"] = [];
 
-          res.json(appData);
+          res.send(appData);
         } else {
           appData["status"] = 200;
           appData["appStatusCode"] = 0;
@@ -363,25 +387,17 @@ const filterProject = async (req, res) => {
           appData["data"] = [];
           appData["error"] = [];
 
-          res.json(appData);
+          res.send(appData);
         }
-      } else {
-        appData["status"] = 200;
-        appData["appStatusCode"] = 0;
-        appData["message"] = "Please select atleast one project name";
-        appData["data"] = [];
-        appData["error"] = [];
-
-        res.json(appData);
-      }
-    } else {
+    }
+    else {
       appData["status"] = 200;
       appData["appStatusCode"] = 0;
-      appData["message"] = "Your projects are empty";
+      appData["message"] = "Please select atleast one project name";
       appData["data"] = [];
       appData["error"] = [];
 
-      res.json(appData);
+      res.send(appData);
     }
   } catch (error) {
     appData["status"] = 404;
@@ -390,7 +406,7 @@ const filterProject = async (req, res) => {
     appData["data"] = [];
     appData["error"] = error;
 
-    res.json(appData);
+    res.send(appData);
   }
 };
 
@@ -409,7 +425,7 @@ const searchProject = async (req, res) => {
         appData["data"] = searchAnswers;
         appData["error"] = [];
 
-        res.json(appData);
+        res.send(appData);
       } else {
         appData["status"] = 200;
         appData["appStatusCode"] = 0;
@@ -417,7 +433,7 @@ const searchProject = async (req, res) => {
         appData["data"] = [];
         appData["error"] = [];
 
-        res.json(appData);
+        res.send(appData);
       }
     } else {
       appData["status"] = 200;
@@ -426,7 +442,7 @@ const searchProject = async (req, res) => {
       appData["data"] = [];
       appData["error"] = [];
 
-      res.json(appData);
+      res.send(appData);
     }
   } catch (error) {
     appData["status"] = 404;
@@ -434,7 +450,7 @@ const searchProject = async (req, res) => {
     appData["message"] = "Sorry, Something went wrong";
     appData["data"] = [];
     appData["error"] = error;
-    res.json(appData);
+    res.send(appData);
   }
 };
 

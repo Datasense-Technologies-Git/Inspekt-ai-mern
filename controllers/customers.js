@@ -31,6 +31,14 @@ const createCustomer = async (req, res) => {
             appData["error"] = [];
             res.send(appData);
           } 
+          else if ( !util.isEmail(req.body.customer_email) ) {
+            appData["status"] = 200;
+            appData["appStatusCode"] = 0;
+            appData["message"] = "Please enter valid email";
+            appData["data"] = [];
+            appData["error"] = [];
+            res.send(appData);
+          }
           else{
             const {
                 user_name,
@@ -56,7 +64,7 @@ const createCustomer = async (req, res) => {
                   appData["error"] = err.message;
     
                   res.send(appData);
-                  console.log(util.emailRegexp());
+                  
                 } else {
                   appData["status"] = 200;
                   appData["appStatusCode"] = 0;
@@ -73,28 +81,28 @@ const createCustomer = async (req, res) => {
         appData["message"] = "Oopsss, Something went wrong !";
         appData['data'] = [];
         appData["error"] = error;
-        res.json(appData)
+        res.send(appData)
     }
 
 }
 
 const getAllCustomers = async (req, res) => {
     try {
-        const allcustomers = await customerSchema.find({});
+        const allcustomers = await customerSchema.find({}).limit(3)
         if (allcustomers.length > 0) {
             appData["status"] = 200;
             appData["appStatusCode"] = 0;
             appData["message"] = `You have totally ${allcustomers.length} customers`;
             appData["data"] = allcustomers;
             appData["error"] = [];
-            res.json(appData);
+            res.send(appData);
           } else {
             appData["status"] = 200;
             appData["appStatusCode"] = 0;
             appData["message"] = "Currently you don't have any customers";
             appData["data"] = allcustomers;
             appData["error"] = [];
-            res.json(appData);
+            res.send(appData);
           }
         } catch (error) {
           appData["status"] = 404;
@@ -103,7 +111,7 @@ const getAllCustomers = async (req, res) => {
           appData["data"] = [];
           appData["error"] = error;
       
-          res.json(appData);
+          res.send(appData);
         }
 }
 
@@ -118,7 +126,7 @@ const getSingleCustomer = async (req, res) => {
             appData['data'] = singleCustomer;
             appData['error'] = [];
 
-            res.json(appData);
+            res.send(appData);
         }
         else {
             appData["status"] = 200;
@@ -127,7 +135,7 @@ const getSingleCustomer = async (req, res) => {
             appData['data'] = [];
             appData['error'] = [];
 
-            res.json(appData);
+            res.send(appData);
         }
 
     }
@@ -138,7 +146,7 @@ const getSingleCustomer = async (req, res) => {
         appData['data'] = [];
         appData['error'] = error;
 
-        res.json(appData);
+        res.send(appData);
     }
 }
 
@@ -215,7 +223,7 @@ const updateCustomer = async (req, res) => {
         appData["message"] = "Something went wrong";
         appData['data'] = [];
         appData['error'] = error;
-        res.json(appData);
+        res.send(appData);
     }
 }
 
@@ -230,7 +238,7 @@ const deleteCustomer = async(req,res)=>{
           appData["data"] = [];
           appData["error"] = [];
         
-        res.json(appData);
+        res.send(appData);
           }
           else{
             const id = { customer_id: req.params.id };
@@ -255,7 +263,7 @@ const deleteCustomer = async(req,res)=>{
               appData["data"] = [];
               appData["error"] = [];
             }
-            res.json(appData);
+            res.send(appData);
           }
           
         } else {
@@ -265,7 +273,7 @@ const deleteCustomer = async(req,res)=>{
           appData["data"] = [];
           appData["error"] = [];
         
-        res.json(appData);
+        res.send(appData);
         }
         
       } catch (error) {
@@ -274,7 +282,7 @@ const deleteCustomer = async(req,res)=>{
         appData["message"] = "Sorry, Something went wrong";
         appData["data"] = [];
         appData["error"] = error;
-        res.json(appData);
+        res.send(appData);
       }
 }
 
@@ -314,7 +322,7 @@ const customerStatus = async(req,res)=>{
             appData["data"] = [];
             appData["error"] = [];
           }
-          res.json(appData);
+          res.send(appData);
         }
         else{
           console.log('---------- 2');
@@ -324,7 +332,7 @@ const customerStatus = async(req,res)=>{
           appData["data"] = [];
           appData["error"] = [];
         
-        res.json(appData);
+        res.send(appData);
         }
         
       } catch (error) {
@@ -334,7 +342,7 @@ const customerStatus = async(req,res)=>{
         appData["message"] = "Sorry, Something went wrong";
         appData["data"] = [];
         appData["error"] = error;
-        res.json(appData);
+        res.send(appData);
       }
 }
 
@@ -353,7 +361,7 @@ const searchCustomer = async (req, res) => {
         appData["data"] = searchAnswers;
         appData["error"] = [];
 
-        res.json(appData);
+        res.send(appData);
       } else {
         appData["status"] = 200;
         appData["appStatusCode"] = 0;
@@ -361,7 +369,7 @@ const searchCustomer = async (req, res) => {
         appData["data"] = [];
         appData["error"] = [];
 
-        res.json(appData);
+        res.send(appData);
       }
     } else {
       appData["status"] = 200;
@@ -370,7 +378,7 @@ const searchCustomer = async (req, res) => {
       appData["data"] = [];
       appData["error"] = [];
 
-      res.json(appData);
+      res.send(appData);
     }
   } catch (error) {
     appData["status"] = 404;
@@ -378,60 +386,54 @@ const searchCustomer = async (req, res) => {
     appData["message"] = "Sorry, Something went wrong";
     appData["data"] = [];
     appData["error"] = error;
-    res.json(appData);
+    res.send(appData);
   }
 };
 
 
 const filterCustomer = async (req, res) => {
-    try {
-        const allcustomers = await customerSchema.find({});
-        
-        if (allcustomers.length > 0) {
+  try {
+    const custStatus = req.body.customer_status;
+    
+    if (custStatus !== "") {
+      
+      const finalFilter = await customerSchema.find({n_Status: {$eq: custStatus}})
+        if (finalFilter.length > 0) {
+          appData["status"] = 200;
+          appData["appStatusCode"] = 0;
+          appData["message"] = "Your filtered results";
+          appData["data"] = finalFilter;
+          appData["error"] = [];
 
-            const filters = allcustomers.filter((data) => data.customer_name === req.body.customer_name);
-            
-            if (filters.length > 0) {
+          res.send(appData);
+        } else {
+          appData["status"] = 200;
+          appData["appStatusCode"] = 0;
+          appData["message"] = "You don't have any projects for this filter";
+          appData["data"] = [];
+          appData["error"] = [];
 
-                appData["status"] = 200;
-                appData["message"] = "Your filtered customer";
-                appData['data'] = [filters];
-                appData['error'] = [];
-
-                res.json(appData);
-            }
-            else {
-
-                appData["status"] = 200;
-                appData["message"] = "No results found for your filter";
-                appData['data'] = [];
-                appData['error'] = [];
-
-                res.json(appData);
-            }
+          res.send(appData);
         }
-        else {
-
-            appData["status"] = 200;
-            appData["message"] = "customers are empty";
-            appData['data'] = [];
-            appData['error'] = [];
-
-            res.json(appData);
-        }
-
     }
-    catch (error) {
+    else {
+      appData["status"] = 200;
+      appData["appStatusCode"] = 0;
+      appData["message"] = "Please select atleast one status";
+      appData["data"] = [];
+      appData["error"] = [];
 
-        appData["status"] = 200;
-        appData["message"] = "Something went wrong";
-        appData['data'] = [];
-        appData['error'] = [];
-
-        res.json(appData);
+      res.send(appData);
     }
+  } catch (error) {
+    appData["status"] = 404;
+    appData["appStatusCode"] = 2;
+    appData["message"] = "Something went wrong";
+    appData["data"] = [];
+    appData["error"] = error;
 
-
+    res.send(appData);
+  }
 }
 
 

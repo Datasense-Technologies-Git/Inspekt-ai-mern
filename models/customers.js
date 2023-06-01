@@ -5,6 +5,11 @@ const customerSchema = new mongoose.Schema({
     user_name:{
         type:String,
         required:[true, "Username is required"],
+        validate(value) {
+          if (!validator.isLength(value, { min: 3, max: 64 })) {
+            throw Error("Length of the Username should be between 3-64");
+          }
+        },
         trim:true,
         lowercase: true,
         unique: true,
@@ -18,17 +23,17 @@ const customerSchema = new mongoose.Schema({
     password: {
         type: String,
         required: [true, "Password required"],
-        validate(value) {
-          if (!validator.isLength(value, { min: 3, max: 64 })) {
-            throw Error("Length of the password should be between 3-64");
-          }
-        },
         trim: true,
         timestamp : true
       },
       customer_name:{
           type:String,
           required:[true, "Customer name is required"],
+          validate(value) {
+            if (!validator.isLength(value, { min: 3, max: 64 })) {
+              throw Error("Length of the Customer name should be between 3-64");
+            }
+          },
           trim:true,
           unique: true,
           lowercase: true,
