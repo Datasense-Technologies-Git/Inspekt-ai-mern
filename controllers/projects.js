@@ -1,4 +1,4 @@
-const dataSchema = require("../models/projects");
+const {Projects} = require("../models/projects");
 const multer = require("multer");
 const path = require("path");
 
@@ -46,10 +46,10 @@ const upload = multer({
 const createProject = async (req, res) => {
   try {
     upload(req, res, async (err) => {
-      const checkProjectName = await dataSchema.findOne({
+      const checkProjectName = await Projects.findOne({
         project_name: req.body.project_name,
       });
-      const checkProjectId = await dataSchema.findOne({
+      const checkProjectId = await Projects.findOne({
         project_id: req.body.project_id,
       });
 
@@ -75,7 +75,7 @@ const createProject = async (req, res) => {
           country,
           state,
         } = req.body;
-        const userdata = new dataSchema({
+        const userdata = new Projects({
           project_name,
           project_id,
           cust_name,
@@ -164,7 +164,49 @@ const createProject = async (req, res) => {
 
 const retriveAllProjects = async (req, res) => {
   try {
-    const allprojects = await dataSchema.find({});
+    // Projects.aggregate(
+    //   [
+    //       { $match: { n_Deleted:1} },
+    //       {
+    //           $lookup: {
+    //               from: "projects",
+    //               localField: 'customer_name',
+    //               foreignField: "cust_name",
+    //               as: "product"
+    //           }
+    //       },
+    //       { $unwind: "$product" },
+    //       { $match: { "product.n_Deleted": 1 } },
+    //       { "$match": { "Orders": [] }},
+    //       {$group: {
+    //           _id: "$_id",
+    //           user_name: { $first: '$user_name'},
+    //           customer_name: { $first: '$customer_name'},
+    //           customer_email: { $first: '$customer_email'},
+    //           customer_id: { $first: '$customer_id'},
+    //           total_projects: { $sum: 1},
+    //           product: {$push: "$product"}
+    //       }}
+
+    //   ]).then(function(docs) 
+    //   {
+    //       if(docs)
+    //       {
+    //           appData["status"] = 1
+    //           appData["message"] = "Success"
+    //           appData["data"] = docs
+    //           appData["error"] = []
+    //           res.send(appData) 
+    //       } else {
+    //           appData["status"] = 0
+    //           appData["message"] = ["Something went wrong"]
+    //           appData["data"] = []
+    //           appData["error"] = []
+    //           res.send(appData)  
+    //       } 
+    //   })
+
+    const allprojects = await Projects.find({});
     if (allprojects.length > 0) {
       appData["status"] = 200;
       appData["appStatusCode"] = 0;
@@ -193,7 +235,7 @@ const retriveAllProjects = async (req, res) => {
 
 const retriveSingleProject = async (req, res) => {
   try {
-    const singleproject = await dataSchema.findOne({
+    const singleproject = await Projects.findOne({
       project_id: req.body.project_id,
     });
     
@@ -239,7 +281,7 @@ const updateProject = async (req, res) => {
         updatedData.image = req.file.path;
       }
       console.log(updatedData ,'------ updatedData');
-      const result = await dataSchema.findOneAndUpdate(
+      const result = await Projects.findOneAndUpdate(
         id,
         updatedData,
         options
@@ -310,7 +352,7 @@ const updateProject = async (req, res) => {
 const deleteProject = async (req, res) => {
   try {
     if (req.body.n_Deleted === 0 || req.body.n_Deleted === 1) {
-      const singleProject = await dataSchema.findOne({ project_id: req.params.id });
+      const singleProject = await Projects.findOne({ project_id: req.params.id });
           if(singleProject.n_Deleted == 0){
             appData["status"] = 200;
           appData["appStatusCode"] = 0;
@@ -324,7 +366,7 @@ const deleteProject = async (req, res) => {
     const updatedData = { n_Deleted: req.body.n_Deleted };
     const options = { new: true };
 
-    const removeData = await dataSchema.findOneAndUpdate(
+    const removeData = await Projects.findOneAndUpdate(
       id,
       updatedData,
       options
@@ -370,7 +412,7 @@ const filterProject = async (req, res) => {
 
     if (projectNameList.length > 0) {
       
-      const finalFilter = await dataSchema.find(
+      const finalFilter = await Projects.find(
         { project_name: { $in: projectNameList } });
         if (finalFilter.length > 0) {
           appData["status"] = 200;
@@ -414,7 +456,7 @@ const searchProject = async (req, res) => {
   try {
     const search = req.body.project_name;
     if (search.length >= 3) {
-      const searchAnswers = await dataSchema.find({
+      const searchAnswers = await Projects.find({
         project_name: { $regex: search, $options: "i" },
       });
 

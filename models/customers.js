@@ -49,4 +49,7 @@ const customerSchema = new mongoose.Schema({
     n_Deleted: { type: Number, default: 1 },
     dt_CreatedOn: { type: Date, default: Date.now },
 })
-module.exports=mongoose.model('customers',customerSchema);
+// module.exports=mongoose.model('customers',customerSchema);
+const Customers = mongoose.model("Customers", customerSchema, "customers");
+
+module.exports = { Customers };
