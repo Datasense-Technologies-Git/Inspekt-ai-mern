@@ -100,8 +100,9 @@ const getAllCustomers = async (req, res) => {
                       as: "product"
                   }
               },
-              { $unwind: "$product" },
-              { $match: { "product.n_Deleted": 1 } },
+              
+              // { $unwind: "$product" },
+              // { $match: { "product.n_Deleted": 1 } },
               // { "$match": { "Orders": [] }},
               {$group: {
                   _id: "$_id",
@@ -109,10 +110,11 @@ const getAllCustomers = async (req, res) => {
                   customer_name: { $first: '$customer_name'},
                   customer_email: { $first: '$customer_email'},
                   customer_id: { $first: '$customer_id'},
-                  total_projects: { $sum: 1},
+                  n_Deleted: {$first: '$n_Deleted'},
+                  // total_projects: { $sum: 1},
                   // c_Data: { $first: '$n_plan_data_limit'},
                   // n_StartPrice:{$min:"$product.n_plan_price"},
-                  product: {$push: "$product"}
+                  projects: {$push: "$product"}
                   // projects: {$push: 
                   //     {_id:"$product._id",
                   //     project_name:"$product.project_name",
@@ -128,7 +130,8 @@ const getAllCustomers = async (req, res) => {
                   //     state: "$product.state",
                   //     }
                   // }
-              }}
+              }},
+              {$sort: {"customer_name": 1}}
 
           ]).then(function(docs) 
           {
@@ -146,12 +149,19 @@ const getAllCustomers = async (req, res) => {
                   //         docs[i].c_Plan="Other name"
                   //     }
                   // }
+                  
+                  
+                  docs.map((data,i)=>{
+                     let a = data.projects.flat(1);
+                     data.projects = a;
+                     data.total_projects = a.length;
+                  })
 
                   appData["status"] = 1
-                  appData["message"] = "Success1"
+                  appData["message"] = "Your all customers"
                   appData["data"] = docs
                   appData["error"] = []
-                  res.send(appData) 
+                  res.send(appData)
               } else {
                   appData["status"] = 0
                   appData["message"] = ["Something went wrong"]

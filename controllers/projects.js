@@ -164,64 +164,80 @@ const createProject = async (req, res) => {
 
 const retriveAllProjects = async (req, res) => {
   try {
-    // Projects.aggregate(
-    //   [
-    //       { $match: { n_Deleted:1} },
-    //       {
-    //           $lookup: {
-    //               from: "projects",
-    //               localField: 'customer_name',
-    //               foreignField: "cust_name",
-    //               as: "product"
-    //           }
-    //       },
-    //       { $unwind: "$product" },
-    //       { $match: { "product.n_Deleted": 1 } },
-    //       { "$match": { "Orders": [] }},
-    //       {$group: {
-    //           _id: "$_id",
-    //           user_name: { $first: '$user_name'},
-    //           customer_name: { $first: '$customer_name'},
-    //           customer_email: { $first: '$customer_email'},
-    //           customer_id: { $first: '$customer_id'},
-    //           total_projects: { $sum: 1},
-    //           product: {$push: "$product"}
-    //       }}
+    Projects.aggregate(
+      [
+          { $match: { n_Deleted:1} },
+          {
+              $lookup: {
+                  from: "inspections",
+                  localField: 'project_name',
+                  foreignField: "project_name",
+                  as: "inspection"
+              }
+          },
+          // { $unwind: "$product" },
+          // { $match: { "product.n_Deleted": 1 } },
+          // { "$match": { "Orders": [] }},
+          {$group: {
+              _id: "$_id",
+              project_name: { $first: '$project_name'},
+              project_id: { $first: '$project_id'},
+              cust_name: { $first: '$cust_name'},
+              built_year: { $first: '$built_year'},
+              no_of_floors: { $first: '$no_of_floors'},
+              street_1: { $first: '$street_1'},
+              street_2: { $first: '$street_2'},
+              city: { $first: '$city'},
+              zipcode: { $first: '$zipcode'},
+              country: { $first: '$country'},
+              state: { $first: '$state'},
+              n_Deleted: { $first: '$n_Deleted'},
+              // inspection :{$first:'$inspection'},
+              project_inspection: {$push: "$inspection"}
+          }}
 
-    //   ]).then(function(docs) 
-    //   {
-    //       if(docs)
-    //       {
-    //           appData["status"] = 1
-    //           appData["message"] = "Success"
-    //           appData["data"] = docs
-    //           appData["error"] = []
-    //           res.send(appData) 
-    //       } else {
-    //           appData["status"] = 0
-    //           appData["message"] = ["Something went wrong"]
-    //           appData["data"] = []
-    //           appData["error"] = []
-    //           res.send(appData)  
-    //       } 
-    //   })
+      ]).then(function(docs) 
+      {
+          if(docs)
+          {
+            console.log(docs ,"-------");
+            docs.map((data,i)=>{
+              let a = data.project_inspection.flat(1);
+              data.project_inspection = a;
+              // data.inspection = a;
+              data.total_inspection = a.length;
+           })
 
-    const allprojects = await Projects.find({});
-    if (allprojects.length > 0) {
-      appData["status"] = 200;
-      appData["appStatusCode"] = 0;
-      appData["message"] = `You have totally ${allprojects.length} projects`;
-      appData["data"] = allprojects;
-      appData["error"] = [];
-      res.send(appData);
-    } else {
-      appData["status"] = 200;
-      appData["appStatusCode"] = 0;
-      appData["message"] = "Currently you don't have any projects";
-      appData["data"] = allprojects;
-      appData["error"] = [];
-      res.send(appData);
-    }
+              appData["status"] = 1
+              appData["message"] = `You have totally ${docs.length} projects`;
+              appData["data"] = docs
+              appData["error"] = []
+              res.send(appData) 
+          } else {
+              appData["status"] = 0
+              appData["message"] = ["Something went wrong"]
+              appData["data"] = []
+              appData["error"] = []
+              res.send(appData)  
+          } 
+      })
+
+    // const allprojects = await Projects.find({});
+    // if (allprojects.length > 0) {
+    //   appData["status"] = 200;
+    //   appData["appStatusCode"] = 0;
+    //   appData["message"] = `You have totally ${allprojects.length} projects`;
+    //   appData["data"] = allprojects;
+    //   appData["error"] = [];
+    //   res.send(appData);
+    // } else {
+    //   appData["status"] = 200;
+    //   appData["appStatusCode"] = 0;
+    //   appData["message"] = "Currently you don't have any projects";
+    //   appData["data"] = allprojects;
+    //   appData["error"] = [];
+    //   res.send(appData);
+    // }
   } catch (error) {
     appData["status"] = 404;
     appData["appStatusCode"] = 2;
