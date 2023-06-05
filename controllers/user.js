@@ -28,7 +28,8 @@ exports.register = async (req, res) => {
       appData["data"] = [];
       appData["error"] = [];
       return res.status(403).send(appData);
-    } else {
+    } 
+    else {
       bycrpt.hash(
         req.body.user_name + req.body.password,
         saltRounds,
@@ -41,6 +42,7 @@ exports.register = async (req, res) => {
             };
             let newRecord = new User(body);
             newRecord.save((err, response) => {
+              console.log(response);
               if (!err) {
                 response["password"] = null;
                 response;
@@ -64,8 +66,18 @@ exports.register = async (req, res) => {
   }
 };
 
+exports.retiveData = async(req,res)=>{
+    try {
+        const retrive  = await dataSchema.find({});
+        res.json({msg:"All data Retrived",data:retrive})
+    } catch (error) {
+        res.json({msg:"Something Wrong",data:error})
+    }
+
+};
+
 exports.login = async (req, res) => {
-  if (req.body?.user_name && req.body?.password) {
+  if (req.body?.user_name || req.body?.password) {
     await User.findOne({ user_name: req.body.user_name }, (err, response) => {
       if (!err && response) {
         bycrpt.compare(
