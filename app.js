@@ -19,11 +19,12 @@ app.get('/',(req,res) => {
     message:'Inspekt Ai Server working fine'
   })
 })
-app.use("/ins/user", userRoutes);
+app.use("/api/v1/ins", userRoutes);
+app.use("/upload-images",express.static("upload-images"));
 app.listen(PORT, () => {
   console.log("Port is running = ",PORT);
 });
 
-app.use("/ins/user", userRoutes);
-app.use("/upload-images",express.static("upload-images"));
+// app.use("/ins/user", userRoutes);
+
 // app.use("/api/ins/customer", customerRoute);

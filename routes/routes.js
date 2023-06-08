@@ -18,8 +18,8 @@ router.get("/logout",authenticator,UserController.logout);
 // router.get("/getAllInspections",authenticator,InspectionController.getAllInspections)
 
 router.post("/createproject",authenticator,projects.createProject);
-router.get("/allprojects",authenticator,projects.retriveAllProjects);
-router.post("/singleproject",authenticator,projects.retriveSingleProject);
+router.get("/allprojects",projects.retriveAllProjects);
+router.post("/singleproject",projects.retriveSingleProject);
 router.post("/filterproject",authenticator,projects.filterProject);
 router.put("/updateproject/:id",authenticator,projects.updateProject);
 router.put("/deleteproject/:id",authenticator,projects.deleteProject);
