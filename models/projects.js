@@ -24,8 +24,7 @@ const dataSchema = new mongoose.Schema({
         type:String,
         required:true,
         trim:true,
-        lowercase: true,
-        unique: true,
+        lowercase: true
     },
     image: {
         type: String
@@ -88,4 +87,8 @@ const dataSchema = new mongoose.Schema({
     dt_CreatedOn: { type: Date, default: Date.now },
 })
 // {strict: false,versionKey: false}
-module.exports=mongoose.model('projects',dataSchema);
+// module.exports=mongoose.model('projects',dataSchema);
+
+const Projects = mongoose.model("Projects", dataSchema, "projects");
+
+module.exports = { Projects };
