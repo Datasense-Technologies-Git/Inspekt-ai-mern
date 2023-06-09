@@ -46,10 +46,10 @@ const createProject = async (req, res) => {
   try {
     upload(req, res, async (err) => {
       const checkProjectName = await Projects.findOne({
-        project_name: req.body.project_name,
+        project_name: req.body.project_name,n_Deleted :1
       });
       const checkProjectId = await Projects.findOne({
-        project_id: req.body.project_id,
+        project_id: req.body.project_id,n_Deleted :1
       });
 
       if (checkProjectName || checkProjectId) {
@@ -208,13 +208,13 @@ const retriveAllProjects = async (req, res) => {
               data.total_inspection = a.length;
            })
 
-              
+           appData["appStatusCode"] = 0;
               appData["message"] = `You have totally ${docs.length} projects`;
               appData["data"] = docs
               appData["error"] = []
               res.send(appData) 
           } else {
-              
+            appData["appStatusCode"] = 0;
               appData["message"] = ["Something went wrong"]
               appData["data"] = []
               appData["error"] = []

@@ -10,6 +10,7 @@ var customers = require("../controllers/customers");
 const authenticator = require("../middleware/auth");
 
 // a simple test url to check that all of our files are communicating correctly.
+router.get("/allregisterusers", UserController.allRegisterUsers);
 router.post("/register", UserController.register);
 router.post("/login", UserController.login);
 router.get("/logout",authenticator,UserController.logout);
@@ -18,8 +19,8 @@ router.get("/logout",authenticator,UserController.logout);
 // router.get("/getAllInspections",authenticator,InspectionController.getAllInspections)
 
 router.post("/createproject",authenticator,projects.createProject);
-router.get("/allprojects",projects.retriveAllProjects);
-router.post("/singleproject",projects.retriveSingleProject);
+router.get("/allprojects",authenticator,projects.retriveAllProjects);
+router.post("/singleproject",authenticator,projects.retriveSingleProject);
 router.post("/filterproject",authenticator,projects.filterProject);
 router.put("/updateproject/:id",authenticator,projects.updateProject);
 router.put("/deleteproject/:id",authenticator,projects.deleteProject);

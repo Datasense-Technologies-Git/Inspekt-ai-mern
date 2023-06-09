@@ -24,8 +24,34 @@ const UserSchema = new Schema({
     trim: true,
     timestamp : true
   },
+  first_name:{
+    type:String,
+    required:[true, "Firstname required"],
+    trim: true,
+    validate(value) {
+      if (!validator.isLength(value, { min: 3, max: 64 })) {
+        throw Error("Length of the firstname should be between 3-64");
+      }
+    },
+  },
+  last_name:{
+    type:String,
+    required:[true, "Lastname required"],
+    trim: true,
+    validate(value) {
+      if (!validator.isLength(value, { min: 3, max: 64 })) {
+        throw Error("Length of the lastname should be between 3-64");
+      }
+    },
+  },
+  email:{
+    type:String,
+    required:[true, "Email required"],
+    trim: true
+
+  },
   key : {type : String}
-});
+},{strict: false,versionKey: false});
 
 const User = mongoose.model("User", UserSchema, "user");
 

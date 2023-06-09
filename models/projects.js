@@ -11,14 +11,14 @@ const dataSchema = new mongoose.Schema({
         //   },
         trim:true,
         lowercase: true,
-        unique: true,
+        // unique: true,
     },
     project_id:{
         type:String,
         required:true,
         trim:true,
         lowercase: true,
-        unique: true,
+        // unique: true,
     },
     cust_name:{
         type:String,
