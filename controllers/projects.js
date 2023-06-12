@@ -163,15 +163,17 @@ const createProject = async (req, res) => {
 
 const retriveAllProjects = async (req, res) => {
   try {
+    const result = req.body;
+    console.log(result ,'----- result');
     Projects.aggregate(
       [
-          { $match: { n_Deleted:1} },
+          { $match: { n_Deleted:1,} },
           {
               $lookup: {
                   from: "inspections",
                   localField: 'project_name',
                   foreignField: "project_name",
-                  as: "inspection"
+                  as: "projects"
               }
           },
           // { $unwind: "$product" },
@@ -182,6 +184,7 @@ const retriveAllProjects = async (req, res) => {
               project_name: { $first: '$project_name'},
               project_id: { $first: '$project_id'},
               cust_name: { $first: '$cust_name'},
+              description: { $first: '$description'},
               built_year: { $first: '$built_year'},
               no_of_floors: { $first: '$no_of_floors'},
               street_1: { $first: '$street_1'},
@@ -193,18 +196,20 @@ const retriveAllProjects = async (req, res) => {
               n_Deleted: { $first: '$n_Deleted'},
               image: { $first: '$image'},
               // inspection :{$first:'$inspection'},
-              project_inspection: {$push: "$inspection"}
-          }}
+              project_inspection: {$push: "$projects"}
+          }},
+          { "$sort": { project_name: 1 } },
+          { "$limit": result.n_limit },
+          { "$skip": result.n_skip }
 
       ]).then(function(docs) 
       {
           if(docs)
           {
-            console.log(docs ,"-------");
+            
             docs.map((data,i)=>{
               let a = data.project_inspection.flat(1);
               data.project_inspection = a;
-              // data.inspection = a;
               data.total_inspection = a.length;
            })
 
@@ -221,23 +226,6 @@ const retriveAllProjects = async (req, res) => {
               res.send(appData)  
           } 
       })
-
-    // const allprojects = await Projects.find({});
-    // if (allprojects.length > 0) {
-    //   
-    //   appData["appStatusCode"] = 0;
-    //   appData["message"] = `You have totally ${allprojects.length} projects`;
-    //   appData["data"] = allprojects;
-    //   appData["error"] = [];
-    //   res.send(appData);
-    // } else {
-    //   
-    //   appData["appStatusCode"] = 0;
-    //   appData["message"] = "Currently you don't have any projects";
-    //   appData["data"] = allprojects;
-    //   appData["error"] = [];
-    //   res.send(appData);
-    // }
   } catch (error) {
     
     appData["appStatusCode"] = 2;
@@ -291,12 +279,11 @@ const updateProject = async (req, res) => {
         const id = { project_id: req.params.id };
         const updatedData = req.body;
       const options = { new: true };
-      delete updatedData.n_Status; 
       delete updatedData.n_Deleted;
       if (req.file) {
         updatedData.image = req.file.path;
       }
-      console.log(updatedData ,'------ updatedData');
+      
       const result = await Projects.findOneAndUpdate(
         id,
         updatedData,
@@ -307,7 +294,7 @@ const updateProject = async (req, res) => {
       if (result != null) {
         result.save(function (err, data) {
           if (err) {
-            console.log(err ,'------------');
+            
             
             appData["appStatusCode"] = 2;
             appData["message"] = "some error";
@@ -355,7 +342,7 @@ const updateProject = async (req, res) => {
       
     });
   } catch (error) {
-    console.log('----------- 2');
+    
     
     appData["appStatusCode"] = 2;
     appData["message"] = "Something went wrong";
@@ -426,39 +413,102 @@ const filterProject = async (req, res) => {
   try {
     const countryNameList = req.body.country;
 
-    if (countryNameList.length > 0) {
+    Projects.aggregate(
+      [
+          { $match: { n_Deleted:1, country: { $in: countryNameList } } },
+          {
+              $lookup: {
+                  from: "inspections",
+                  localField: 'project_name',
+                  foreignField: "project_name",
+                  as: "projects"
+              }
+          },
+          // { $unwind: "$product" },
+          // { $match: { "product.n_Deleted": 1 } },
+          // { "$match": { "Orders": [] }},
+          {$group: {
+              _id: "$_id",
+              project_name: { $first: '$project_name'},
+              project_id: { $first: '$project_id'},
+              cust_name: { $first: '$cust_name'},
+              description: { $first: '$description'},
+              built_year: { $first: '$built_year'},
+              no_of_floors: { $first: '$no_of_floors'},
+              street_1: { $first: '$street_1'},
+              street_2: { $first: '$street_2'},
+              city: { $first: '$city'},
+              zipcode: { $first: '$zipcode'},
+              country: { $first: '$country'},
+              state: { $first: '$state'},
+              n_Deleted: { $first: '$n_Deleted'},
+              image: { $first: '$image'},
+              // inspection :{$first:'$inspection'},
+              project_inspection: {$push: "$projects"}
+          }}
+        ]).then(function(docs) 
+        {
+            if(docs)
+            {
+                  docs.map((data,i)=>{
+                    let a = data.project_inspection.flat(1);
+                    data.project_inspection = a;
+                    data.total_inspection = a.length;
+                 })
+                
+                appData["appStatusCode"] = 0;
+                appData["message"] = `You have totally ${docs.length} projects`;
+                appData["data"] = docs
+                appData["error"] = []
+                res.send(appData) 
+            } else {
+              appData["appStatusCode"] = 0;
+                appData["message"] = ["Something went wrong"]
+                appData["data"] = []
+                appData["error"] = []
+                res.send(appData)  
+            } 
+        })
+
+
+
+
+
+
+
+
+    // if (countryNameList.length > 0) {
       
-      const finalFilter = await Projects.find(
-        { country: { $in: countryNameList } });
+    //   const finalFilter = await Projects.find(
+    //     { country: { $in: countryNameList } });
         
-
-        if (finalFilter.length > 0) {
+    //     if (finalFilter.length > 0) {
           
-          appData["appStatusCode"] = 0;
-          appData["message"] = "Your filtered results";
-          appData["data"] = finalFilter;
-          appData["error"] = [];
+    //       appData["appStatusCode"] = 0;
+    //       appData["message"] = "Your filtered results";
+    //       appData["data"] = finalFilter;
+    //       appData["error"] = [];
 
-          res.send(appData);
-        } else {
+    //       res.send(appData);
+    //     } else {
           
-          appData["appStatusCode"] = 0;
-          appData["message"] = "You don't have any projects for this filter";
-          appData["data"] = [];
-          appData["error"] = [];
+    //       appData["appStatusCode"] = 0;
+    //       appData["message"] = "You don't have any projects for this filter";
+    //       appData["data"] = [];
+    //       appData["error"] = [];
 
-          res.send(appData);
-        }
-    }
-    else {
+    //       res.send(appData);
+    //     }
+    // }
+    // else {
       
-      appData["appStatusCode"] = 0;
-      appData["message"] = "Please select atleast one project name";
-      appData["data"] = [];
-      appData["error"] = [];
+    //   appData["appStatusCode"] = 0;
+    //   appData["message"] = "Please select atleast one project name";
+    //   appData["data"] = [];
+    //   appData["error"] = [];
 
-      res.send(appData);
-    }
+    //   res.send(appData);
+    // }
   } catch (error) {
     
     appData["appStatusCode"] = 2;
@@ -473,38 +523,67 @@ const filterProject = async (req, res) => {
 const searchProject = async (req, res) => {
   try {
     const search = req.body.project_name;
-    if (search.length >= 3) {
-      const searchAnswers = await Projects.find({
-        project_name: { $regex: search, $options: "i" },
-      });
 
-      if (searchAnswers.length > 0) {
-        
-        appData["appStatusCode"] = 0;
-        appData["message"] = "Your search results are below";
-        appData["data"] = searchAnswers;
-        appData["error"] = [];
+    
 
-        res.send(appData);
-      } else {
-        
-        appData["appStatusCode"] = 0;
-        appData["message"] = "No projects found for your search";
-        appData["data"] = [];
-        appData["error"] = [];
-
-        res.send(appData);
-      }
-    } else {
-      
-      appData["appStatusCode"] = 0;
-      appData["message"] = "Min 3 characters required for your search";
-      appData["data"] = [];
-      appData["error"] = [];
-
-      res.send(appData);
-    }
-  } catch (error) {
+    Projects.aggregate(
+      [
+          { $match: { n_Deleted:1,project_name: {$regex:search,$options:"i"}} },
+          {
+              $lookup: {
+                  from: "inspections",
+                  localField: 'project_name',
+                  foreignField: "project_name",
+                  as: "projects"
+              }
+          },
+          // { $unwind: "$product" },
+          // { $match: { "product.n_Deleted": 1 } },
+          // { "$match": { "Orders": [] }},
+          {$group: {
+              _id: "$_id",
+              project_name: { $first: '$project_name'},
+              project_id: { $first: '$project_id'},
+              cust_name: { $first: '$cust_name'},
+              description: { $first: '$description'},
+              built_year: { $first: '$built_year'},
+              no_of_floors: { $first: '$no_of_floors'},
+              street_1: { $first: '$street_1'},
+              street_2: { $first: '$street_2'},
+              city: { $first: '$city'},
+              zipcode: { $first: '$zipcode'},
+              country: { $first: '$country'},
+              state: { $first: '$state'},
+              n_Deleted: { $first: '$n_Deleted'},
+              image: { $first: '$image'},
+              // inspection :{$first:'$inspection'},
+              project_inspection: {$push: "$projects"}
+          }}
+        ]).then(function(docs) 
+        {
+            if(docs)
+            {
+                  docs.map((data,i)=>{
+                    let a = data.project_inspection.flat(1);
+                    data.project_inspection = a;
+                    data.total_inspection = a.length;
+                 })
+                
+                appData["appStatusCode"] = 0;
+                appData["message"] = `You have totally ${docs.length} projects`;
+                appData["data"] = docs
+                appData["error"] = []
+                res.send(appData) 
+            } else {
+              appData["appStatusCode"] = 0;
+                appData["message"] = ["Something went wrong"]
+                appData["data"] = []
+                appData["error"] = []
+                res.send(appData)  
+            } 
+        })
+  } 
+  catch (error) {
     
     appData["appStatusCode"] = 2;
     appData["message"] = "Sorry, Something went wrong";
