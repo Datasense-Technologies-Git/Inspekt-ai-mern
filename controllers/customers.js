@@ -213,7 +213,7 @@ const getSingleCustomer = async (req, res) => {
             
             appData["appStatusCode"] = 0;
             appData["message"] = "Your selected customer";
-            appData['data'] = singleCustomer;
+            appData['data'] = [singleCustomer];
             appData['error'] = [];
 
             res.send(appData);
