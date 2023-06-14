@@ -160,7 +160,7 @@ const createProject = async (req, res) => {
 const retriveAllProjects = async (req, res) => {
   try {
     const result = req.body;
-    console.log(result, "----- result");
+    
     Projects.aggregate([
       { $match: { n_Deleted: 1 } },
       {

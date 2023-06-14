@@ -115,21 +115,6 @@ const getAllCustomers = async (req, res) => {
                   // c_Data: { $first: '$n_plan_data_limit'},
                   // n_StartPrice:{$min:"$product.n_plan_price"},
                   projects: {$push: "$product"}
-                  // projects: {$push: 
-                  //     {_id:"$product._id",
-                  //     project_name:"$product.project_name",
-                  //     project_id: "$product.project_id",
-                  //     cust_name: "$product.cust_name",
-                  //     built_year: "$product.built_year",
-                  //     no_of_floors: "$product.no_of_floors",
-                  //     street_1: "$product.street_1",
-                  //     street_2: "$product.street_2",
-                  //     city: "$product.city",
-                  //     zipcode: "$product.zipcode",
-                  //     country: "$product.country",
-                  //     state: "$product.state",
-                  //     }
-                  // }
               }},
               {$sort: {"customer_name": 1}}
 
@@ -137,20 +122,6 @@ const getAllCustomers = async (req, res) => {
           {
               if(docs)
               {
-                  // var planName = ["","Diamond Plan","Gold Plan","Silver Plan"];
-                  // for(var i = 0; i < docs.length;i++){
-                  //     if(docs[i].n_plan_id==1) {
-                  //         docs[i].c_Plan=planName[1]
-                  //     } else if(docs[i].n_plan_id==2) {
-                  //         docs[i].c_Plan=planName[2]
-                  //     } else  if(docs[i].n_plan_id==3) {
-                  //         docs[i].c_Plan=planName[3]
-                  //     } else {
-                  //         docs[i].c_Plan="Other name"
-                  //     }
-                  // }
-                  
-                  
                   docs.map((data,i)=>{
                      let a = data.projects.flat(1);
                      data.projects = a;
@@ -484,38 +455,112 @@ const searchCustomer = async (req, res) => {
 const filterCustomer = async (req, res) => {
   try {
     const custStatus = req.body.customer_status;
+
+    Customers.aggregate(
+      [
+          { $match: { n_Deleted:1,n_Status: {$eq: custStatus}}},
+          {
+              $lookup: {
+                  from: "projects",
+                  localField: 'customer_name',
+                  foreignField: "cust_name",
+                  as: "project"
+              }
+          },
+          
+          // { $unwind: "$project" },
+          // { $match: { "project.n_Deleted": 1 } },
+          // { "$match": { "Orders": [] }},
+          {$group: {
+              _id: "$_id",
+              user_name: { $first: '$user_name'},
+              customer_name: { $first: '$customer_name'},
+              customer_email: { $first: '$customer_email'},
+              customer_id: { $first: '$customer_id'},
+              n_Deleted: {$first: '$n_Deleted'},
+              n_Status: {$first: '$n_Status'},
+              // total_projects: { $sum: 1},
+              // c_Data: { $first: '$n_plan_data_limit'},
+              // n_StartPrice:{$min:"$project.n_plan_price"},
+              projects: {$push: "$project"}
+          }},
+          {$sort: {"customer_name": 1}}
+
+      ]).then(function(docs) 
+      {
+          if(docs)
+          {
+              docs.map((data,i)=>{
+                 let a = data.projects.flat(1);
+                 data.projects = a;
+                 data.total_projects = a.length;
+              })
+
+              
+              appData["message"] = "Your filtered customers"
+              appData["data"] = docs
+              appData["error"] = []
+              res.send(appData)
+          } else {
+              
+              appData["message"] = ["Something went wrong"]
+              appData["data"] = []
+              appData["error"] = []
+              res.send(appData)  
+          } 
+      }).catch((err)=>{
+        
+        appData["message"] = "some error"
+        appData["data"] = []
+        appData["error"] = err
+        res.send(appData)
+      })
+
+
+
+
+
+
+
+
+
+
+
+
+
     
-    if (custStatus !== "") {
+    // if (custStatus !== "") {
       
-      const finalFilter = await Customers.find({n_Status: {$eq: custStatus}})
-        if (finalFilter.length > 0) {
+    //   const finalFilter = await Customers.find({n_Status: {$eq: custStatus}})
+    //     if (finalFilter.length > 0) {
           
-          appData["appStatusCode"] = 0;
-          appData["message"] = "Your filtered results";
-          appData["data"] = finalFilter;
-          appData["error"] = [];
+    //       appData["appStatusCode"] = 0;
+    //       appData["message"] = "Your filtered results";
+    //       appData["data"] = finalFilter;
+    //       appData["error"] = [];
 
-          res.send(appData);
-        } else {
+    //       res.send(appData);
+    //     } else {
           
-          appData["appStatusCode"] = 0;
-          appData["message"] = "You don't have any projects for this filter";
-          appData["data"] = [];
-          appData["error"] = [];
+    //       appData["appStatusCode"] = 0;
+    //       appData["message"] = "You don't have any projects for this filter";
+    //       appData["data"] = [];
+    //       appData["error"] = [];
 
-          res.send(appData);
-        }
-    }
-    else {
+    //       res.send(appData);
+    //     }
+    // }
+    // else {
       
-      appData["appStatusCode"] = 0;
-      appData["message"] = "Please select atleast one status";
-      appData["data"] = [];
-      appData["error"] = [];
+    //   appData["appStatusCode"] = 0;
+    //   appData["message"] = "Please select atleast one status";
+    //   appData["data"] = [];
+    //   appData["error"] = [];
 
-      res.send(appData);
-    }
-  } catch (error) {
+    //   res.send(appData);
+    // }
+  } 
+  catch (error) {
     
     appData["appStatusCode"] = 2;
     appData["message"] = "Something went wrong";
