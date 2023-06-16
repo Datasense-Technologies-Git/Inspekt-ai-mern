@@ -386,62 +386,138 @@ const deleteProject = async (req, res) => {
 const filterProject = async (req, res) => {
   try {
     const countryNameList = req.body.country;
+    const customerNameList = req.body.customer;
 
-    Projects.aggregate([
-      { $match: { n_Deleted: 1, country: { $in: countryNameList } } },
-      {
-        $lookup: {
-          from: "inspections",
-          localField: "project_name",
-          foreignField: "project_name",
-          as: "projects",
+    if ( countryNameList.length > 0 && customerNameList.length > 0 ) {
+      console.log('---- one');
+      Projects.aggregate([
+        { $match: { n_Deleted: 1, 
+          $and: [
+            {country: { $in: countryNameList }},
+            {cust_name: { $in: customerNameList }},
+          ]
+          
+        }
         },
-      },
-      // { $unwind: "$product" },
-      // { $match: { "product.n_Deleted": 1 } },
-      // { "$match": { "Orders": [] }},
-      {
-        $group: {
-          _id: "$_id",
-          project_name: { $first: "$project_name" },
-          project_id: { $first: "$project_id" },
-          cust_name: { $first: "$cust_name" },
-          description: { $first: "$description" },
-          built_year: { $first: "$built_year" },
-          no_of_floors: { $first: "$no_of_floors" },
-          street_1: { $first: "$street_1" },
-          street_2: { $first: "$street_2" },
-          city: { $first: "$city" },
-          zipcode: { $first: "$zipcode" },
-          country: { $first: "$country" },
-          state: { $first: "$state" },
-          n_Deleted: { $first: "$n_Deleted" },
-          image: { $first: "$image" },
-          // inspection :{$first:'$inspection'},
-          project_inspection: { $push: "$projects" },
+        {
+          $lookup: {
+            from: "inspections",
+            localField: "project_name",
+            foreignField: "project_name",
+            as: "projects",
+          },
         },
-      },
-    ]).then(function (docs) {
-      if (docs) {
-        docs.map((data, i) => {
-          let a = data.project_inspection.flat(1);
-          data.project_inspection = a;
-          data.total_inspection = a.length;
-        });
-
-        appData["appStatusCode"] = 0;
-        appData["message"] = `You have totally ${docs.length} projects`;
-        appData["data"] = docs;
-        appData["error"] = [];
-        res.send(appData);
-      } else {
-        appData["appStatusCode"] = 0;
-        appData["message"] = ["Something went wrong"];
-        appData["data"] = [];
-        appData["error"] = [];
-        res.send(appData);
-      }
-    });
+        // { $unwind: "$product" },
+        // { $match: { "product.n_Deleted": 1 } },
+        // { "$match": { "Orders": [] }},
+        {
+          $group: {
+            _id: "$_id",
+            project_name: { $first: "$project_name" },
+            project_id: { $first: "$project_id" },
+            cust_name: { $first: "$cust_name" },
+            description: { $first: "$description" },
+            built_year: { $first: "$built_year" },
+            no_of_floors: { $first: "$no_of_floors" },
+            street_1: { $first: "$street_1" },
+            street_2: { $first: "$street_2" },
+            city: { $first: "$city" },
+            zipcode: { $first: "$zipcode" },
+            country: { $first: "$country" },
+            state: { $first: "$state" },
+            n_Deleted: { $first: "$n_Deleted" },
+            image: { $first: "$image" },
+            // inspection :{$first:'$inspection'},
+            project_inspection: { $push: "$projects" },
+          },
+        },
+      ]).then(function (docs) {
+        if (docs) {
+          docs.map((data, i) => {
+            let a = data.project_inspection.flat(1);
+            data.project_inspection = a;
+            data.total_inspection = a.length;
+          });
+  
+          appData["appStatusCode"] = 0;
+          appData["message"] = `You have totally ${docs.length} projects`;
+          appData["data"] = docs;
+          appData["error"] = [];
+          res.send(appData);
+        } else {
+          appData["appStatusCode"] = 0;
+          appData["message"] = ["Something went wrong"];
+          appData["data"] = [];
+          appData["error"] = [];
+          res.send(appData);
+        }
+      });
+    }
+    else{
+      console.log('---- two');
+      Projects.aggregate([
+        { $match: { n_Deleted: 1, 
+          $or: [
+            {country: { $in: countryNameList }},
+            {cust_name: { $in: customerNameList }},
+          ]
+          
+        }
+        },
+        {
+          $lookup: {
+            from: "inspections",
+            localField: "project_name",
+            foreignField: "project_name",
+            as: "projects",
+          },
+        },
+        // { $unwind: "$product" },
+        // { $match: { "product.n_Deleted": 1 } },
+        // { "$match": { "Orders": [] }},
+        {
+          $group: {
+            _id: "$_id",
+            project_name: { $first: "$project_name" },
+            project_id: { $first: "$project_id" },
+            cust_name: { $first: "$cust_name" },
+            description: { $first: "$description" },
+            built_year: { $first: "$built_year" },
+            no_of_floors: { $first: "$no_of_floors" },
+            street_1: { $first: "$street_1" },
+            street_2: { $first: "$street_2" },
+            city: { $first: "$city" },
+            zipcode: { $first: "$zipcode" },
+            country: { $first: "$country" },
+            state: { $first: "$state" },
+            n_Deleted: { $first: "$n_Deleted" },
+            image: { $first: "$image" },
+            // inspection :{$first:'$inspection'},
+            project_inspection: { $push: "$projects" },
+          },
+        },
+      ]).then(function (docs) {
+        if (docs) {
+          docs.map((data, i) => {
+            let a = data.project_inspection.flat(1);
+            data.project_inspection = a;
+            data.total_inspection = a.length;
+          });
+  
+          appData["appStatusCode"] = 0;
+          appData["message"] = `You have totally ${docs.length} projects`;
+          appData["data"] = docs;
+          appData["error"] = [];
+          res.send(appData);
+        } else {
+          appData["appStatusCode"] = 0;
+          appData["message"] = ["Something went wrong"];
+          appData["data"] = [];
+          appData["error"] = [];
+          res.send(appData);
+        }
+      });
+    }
 
     // if (countryNameList.length > 0) {
 

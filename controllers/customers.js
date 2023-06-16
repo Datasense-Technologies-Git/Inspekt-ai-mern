@@ -220,7 +220,6 @@ const updateCustomer = async (req, res) => {
         const updatedData = req.body;
         const options = { new: true };
         delete updatedData.password; 
-        delete updatedData.n_Status; 
         delete updatedData.n_Deleted; 
 
         // const checkUserName = await Customers.findOne({
@@ -257,6 +256,7 @@ const updateCustomer = async (req, res) => {
         //     res.send(appData);
         //   } 
         //   else{
+          console.log(updatedData);
             const result = await Customers.findOneAndUpdate(
                 id, updatedData, options
             )
@@ -294,7 +294,7 @@ const deleteCustomer = async(req,res)=>{
           const singleCustomer = await Customers.findOne({ customer_id: req.params.id });
           if(singleCustomer.n_Deleted == 0){
             
-          appData["appStatusCode"] = 0;
+          appData["appStatusCode"] = 1;
           appData["message"] = "Your customer already deleted";
           appData["data"] = [];
           appData["error"] = [];
@@ -319,7 +319,7 @@ const deleteCustomer = async(req,res)=>{
               appData["error"] = [];
             } else {
               
-              appData["appStatusCode"] = 0;
+              appData["appStatusCode"] = 1;
               appData["message"] = "no customer found for this ID";
               appData["data"] = [];
               appData["error"] = [];
@@ -329,7 +329,7 @@ const deleteCustomer = async(req,res)=>{
           
         } else {
           
-          appData["appStatusCode"] = 0;
+          appData["appStatusCode"] = 1;
           appData["message"] = "Invalid code. The code should be 0 (or) 1";
           appData["data"] = [];
           appData["error"] = [];
@@ -410,37 +410,72 @@ const customerStatus = async(req,res)=>{
 const searchCustomer = async (req, res) => {
   try {
     const search = req.body.customer_name;
-    if (search.length >= 3) {
-      const searchAnswers = await Customers.find({
-        customer_name: { $regex: search, $options: "i" },
-      });
 
-      if (searchAnswers.length > 0) {
+    Customers.aggregate(
+      [
+          { $match: {
+            n_Deleted: 1,
+            $or: [
+              { customer_name: { $regex: search, $options: "i" } },
+              { customer_email: { $regex: search, $options: "i" } },
+            ],
+          } },
+          {
+              $lookup: {
+                  from: "projects",
+                  localField: 'customer_name',
+                  foreignField: "cust_name",
+                  as: "product"
+              }
+          },
+          
+          // { $unwind: "$product" },
+          // { $match: { "product.n_Deleted": 1 } },
+          // { "$match": { "Orders": [] }},
+          {$group: {
+              _id: "$_id",
+              user_name: { $first: '$user_name'},
+              customer_name: { $first: '$customer_name'},
+              customer_email: { $first: '$customer_email'},
+              customer_id: { $first: '$customer_id'},
+              n_Deleted: {$first: '$n_Deleted'},
+              n_Status: {$first: '$n_Status'},
+              // total_projects: { $sum: 1},
+              // c_Data: { $first: '$n_plan_data_limit'},
+              // n_StartPrice:{$min:"$product.n_plan_price"},
+              projects: {$push: "$product"}
+          }},
+          {$sort: {"customer_name": 1}}
+
+      ]).then(function(docs) 
+      {
+          if(docs)
+          {
+              docs.map((data,i)=>{
+                 let a = data.projects.flat(1);
+                 data.projects = a;
+                 data.total_projects = a.length;
+              })
+
+              
+              appData["message"] = "Your search results"
+              appData["data"] = docs
+              appData["error"] = []
+              res.send(appData)
+          } else {
+              
+              appData["message"] = ["Something went wrong"]
+              appData["data"] = []
+              appData["error"] = []
+              res.send(appData)  
+          } 
+      }).catch((err)=>{
         
-        appData["appStatusCode"] = 0;
-        appData["message"] = "Your search results are below";
-        appData["data"] = searchAnswers;
-        appData["error"] = [];
-
-        res.send(appData);
-      } else {
-        
-        appData["appStatusCode"] = 0;
-        appData["message"] = "No customers found for your search";
-        appData["data"] = [];
-        appData["error"] = [];
-
-        res.send(appData);
-      }
-    } else {
-      
-      appData["appStatusCode"] = 0;
-      appData["message"] = "Min 3 characters required for your search";
-      appData["data"] = [];
-      appData["error"] = [];
-
-      res.send(appData);
-    }
+        appData["message"] = "some error"
+        appData["data"] = []
+        appData["error"] = err
+        res.send(appData)
+      })
   } catch (error) {
     
     appData["appStatusCode"] = 2;
