@@ -160,9 +160,24 @@ const createProject = async (req, res) => {
 const retriveAllProjects = async (req, res) => {
   try {
     const result = req.body;
-    
+    console.log(result ,'--- result');
+    let _search =  { n_Deleted: 1 }
+    if(result.searchTerm) {
+      _search['$or'] = [
+        { project_name: { $regex: result.searchTerm, $options: "i" } },
+        { cust_name: { $regex: result.searchTerm, $options: "i" } },
+        { street_1: { $regex: result.searchTerm, $options: "i" } },
+        { city: { $regex: result.searchTerm, $options: "i" } },
+        { state: { $regex: result.searchTerm, $options: "i" } },
+        { country: { $regex: result.searchTerm, $options: "i" } }
+      ]
+    }
+    if (result.country) {
+      
+    }
+
     Projects.aggregate([
-      { $match: { n_Deleted: 1 } },
+      { $match: _search },
       {
         $lookup: {
           from: "inspections",

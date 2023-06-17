@@ -41,6 +41,6 @@ router.post("/singleinspection",authenticator,inspection.getSingleInspection)
 router.put("/deleteinspection/:id",authenticator,inspection.deleteInspection)
 router.post("/searchinspection",authenticator,inspection.searchInspection)
 router.post("/filterinspection",authenticator,inspection.filterInspection)
-router.post("/updateinspection/:id",authenticator,inspection.updateInspection)
+router.put("/updateinspection/:id",authenticator,inspection.updateInspection)
 
 module.exports = router;
