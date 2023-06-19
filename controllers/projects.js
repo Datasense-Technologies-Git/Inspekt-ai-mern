@@ -160,7 +160,7 @@ const createProject = async (req, res) => {
 const retriveAllProjects = async (req, res) => {
   try {
     const result = req.body;
-    console.log(result ,'--- result');
+    
     let _search =  { n_Deleted: 1 }
     if(result.searchTerm) {
       _search['$or'] = [
@@ -246,26 +246,68 @@ const retriveAllProjects = async (req, res) => {
 
 const retriveSingleProject = async (req, res) => {
   try {
-    const singleproject = await Projects.findOne({
-      project_id: req.body.project_id,
+
+    let projectID = req.body.project_id;
+
+    let _search =  { n_Deleted: 1,project_id:projectID }
+
+    Projects.aggregate([
+      { $match: _search },
+      {
+        $lookup: {
+          from: "inspections",
+          localField: "project_name",
+          foreignField: "project_name",
+          as: "projects",
+        },
+      },
+      // { $unwind: "$product" },
+      // { $match: { "product.n_Deleted": 1 } },
+      // { "$match": { "Orders": [] }},
+      {
+        $group: {
+          _id: "$_id",
+          project_name: { $first: "$project_name" },
+          project_id: { $first: "$project_id" },
+          cust_name: { $first: "$cust_name" },
+          description: { $first: "$description" },
+          built_year: { $first: "$built_year" },
+          no_of_floors: { $first: "$no_of_floors" },
+          street_1: { $first: "$street_1" },
+          street_2: { $first: "$street_2" },
+          city: { $first: "$city" },
+          zipcode: { $first: "$zipcode" },
+          country: { $first: "$country" },
+          state: { $first: "$state" },
+          n_Deleted: { $first: "$n_Deleted" },
+          image: { $first: "$image" },
+          // inspection :{$first:'$inspection'},
+          project_inspection: { $push: "$projects" },
+        },
+      }
+    ]).then(function (docs) {
+      if (docs) {
+        docs.map((data, i) => {
+          let a = data.project_inspection.flat(1);
+          data.project_inspection = a;
+          data.total_inspection = a.length;
+        });
+
+        appData["appStatusCode"] = 0;
+        appData["message"] = `You have totally ${docs.length} projects`;
+        appData["data"] = docs;
+        appData["error"] = [];
+        res.send(appData);
+      } else {
+        appData["appStatusCode"] = 0;
+        appData["message"] = ["Something went wrong"];
+        appData["data"] = [];
+        appData["error"] = [];
+        res.send(appData);
+      }
     });
-
-    if (singleproject) {
-      appData["appStatusCode"] = 0;
-      appData["message"] = "Your selected project";
-      appData["data"] = [singleproject];
-      appData["error"] = [];
-
-      res.send(appData);
-    } else {
-      appData["appStatusCode"] = 0;
-      appData["message"] = "No project found (or) Invalid project_id";
-      appData["data"] = [];
-      appData["error"] = [];
-
-      res.send(appData);
-    }
-  } catch (error) {
+  } 
+  catch (error) {
     appData["appStatusCode"] = 2;
     appData["message"] = "Something went wrong";
     appData["data"] = [];
@@ -404,7 +446,7 @@ const filterProject = async (req, res) => {
     const customerNameList = req.body.customer;
 
     if ( countryNameList.length > 0 && customerNameList.length > 0 ) {
-      console.log('---- one');
+      
       Projects.aggregate([
         { $match: { n_Deleted: 1, 
           $and: [
@@ -469,7 +511,7 @@ const filterProject = async (req, res) => {
       });
     }
     else{
-      console.log('---- two');
+      
       Projects.aggregate([
         { $match: { n_Deleted: 1, 
           $or: [

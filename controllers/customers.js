@@ -178,26 +178,59 @@ const getAllCustomers = async (req, res) => {
 
 const getSingleCustomer = async (req, res) => {
     try {
-        const singleCustomer = await Customers.findOne({ customer_id: req.body.customer_id });
-        if (singleCustomer) {
+      let customerId = req.body.customer_id;
+      let _search =  { n_Deleted: 1,customer_id:customerId }
 
-            
-            appData["appStatusCode"] = 0;
-            appData["message"] = "Your selected customer";
-            appData['data'] = [singleCustomer];
-            appData['error'] = [];
+      Customers.aggregate([
+      { $match: _search },
+      {
+        $lookup: {
+          from: "projects",
+          localField: 'customer_name',
+          foreignField: "cust_name",
+          as: "product",
+        },
+      },
+      // { $unwind: "$product" },
+      // { $match: { "product.n_Deleted": 1 } },
+      // { "$match": { "Orders": [] }},
+      {
+        $group: {_id: "$_id",
+        user_name: { $first: '$user_name'},
+        customer_name: { $first: '$customer_name'},
+        customer_email: { $first: '$customer_email'},
+        customer_id: { $first: '$customer_id'},
+        n_Deleted: {$first: '$n_Deleted'},
+        n_Status: {$first: '$n_Status'},
+        // total_projects: { $sum: 1},
+        // c_Data: { $first: '$n_plan_data_limit'},
+        // n_StartPrice:{$min:"$product.n_plan_price"},
+        projects: {$push: "$product"}
+        },
+      }
+    ]).then(function (docs) {
+      if (docs) {
+        docs.map((data, i) => {
+          let a = data.projects.flat(1);
+          data.projects = a;
+          data.total_projects = a.length;
+        });
 
-            res.send(appData);
-        }
-        else {
-            
-            appData["appStatusCode"] = 0;
-            appData["message"] = "No results found (or) Invalid customer_id";
-            appData['data'] = [];
-            appData['error'] = [];
-
-            res.send(appData);
-        }
+        appData["appStatusCode"] = 0;
+        appData["message"] = `You have totally ${docs.length} customers`;
+        appData["data"] = docs;
+        appData["error"] = [];
+        res.send(appData);
+      } else {
+        appData["appStatusCode"] = 0;
+        appData["message"] = ["Something went wrong"];
+        appData["data"] = [];
+        appData["error"] = [];
+        res.send(appData);
+      }
+    });
+        
+        
 
     }
     catch (error) {
@@ -210,9 +243,6 @@ const getSingleCustomer = async (req, res) => {
         res.send(appData);
     }
 }
-
-
-
 
 const updateCustomer = async (req, res) => {
     try {
