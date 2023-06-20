@@ -107,7 +107,7 @@ exports.login = async (req, res) => {
                       });
                     } else {
                       appData["appStatusCode"] = 4;
-                      appData["message"] = "Password required";
+                      appData["message"] = "Invalid credential";
                       appData["data"] = [];
                       appData["error"] = [];
                       res.send(appData);

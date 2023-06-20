@@ -172,9 +172,9 @@ const retriveAllProjects = async (req, res) => {
         { country: { $regex: result.searchTerm, $options: "i" } }
       ]
     }
-    if (result.country) {
+    // if (result.country) {
       
-    }
+    // }
 
     Projects.aggregate([
       { $match: _search },
