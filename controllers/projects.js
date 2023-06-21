@@ -267,6 +267,7 @@ const retriveSingleProject = async (req, res) => {
       {
         $group: {
           _id: "$_id",
+          dateCreation: { $first:"$dt_CreatedOn"},
           project_name: { $first: "$project_name" },
           project_id: { $first: "$project_id" },
           cust_name: { $first: "$cust_name" },
@@ -287,10 +288,12 @@ const retriveSingleProject = async (req, res) => {
       }
     ]).then(function (docs) {
       if (docs) {
+        console.log(docs ,'----- ');
         docs.map((data, i) => {
           let a = data.project_inspection.flat(1);
           data.project_inspection = a;
           data.total_inspection = a.length;
+          
         });
 
         appData["appStatusCode"] = 0;

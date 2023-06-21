@@ -98,17 +98,18 @@ const getAllCustomers = async (req, res) => {
                       localField: 'customer_name',
                       foreignField: "cust_name",
                       as: "product"
-                  }
+                  },
+                  
                   
               },
-              {
-                $lookup: {
-                  from: "inspections",
-                  localField: 'customer_name',
-                  foreignField: "cust_name",
-                  as: "second"
-              }
-              },
+              // {
+              //   $lookup: {
+              //     from: "inspections",
+              //     localField: 'customer_name',
+              //     foreignField: "product.cust_name",
+              //     as: "second"
+              // }
+              // },
               
               // { $unwind: "$product" },
               // { $match: { "product.n_Deleted": 1 } },
@@ -128,8 +129,8 @@ const getAllCustomers = async (req, res) => {
                   second: {$push: "$second"}
               }},
               {$sort: {"customer_name": 1}},
-              { $limit: result.n_limit },
-              { $skip: result.n_skip },
+              // { $limit: result.n_limit },
+              // { $skip: result.n_skip },
 
           ]).then(function(docs) 
           {
@@ -242,7 +243,7 @@ const getSingleCustomer = async (req, res) => {
 const updateCustomer = async (req, res) => {
     try {
         const id = {customer_id:req.params.id}
-        const updatedData = req.body;
+        const updatedData = req.body.updateCustomer;
         const options = { new: true };
         delete updatedData.password; 
         delete updatedData.n_Deleted; 
