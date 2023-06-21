@@ -50,6 +50,11 @@ const UserSchema = new Schema({
     trim: true
 
   },
+  role: {
+    type: String,
+    enum: ["user", "admin", "super-admin"],
+    default: "user",
+  },
   key : {type : String}
 },{strict: false,versionKey: false});
 

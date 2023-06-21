@@ -10,7 +10,7 @@ var customers = require("../controllers/customers");
 const authenticator = require("../middleware/auth");
 
 // a simple test url to check that all of our files are communicating correctly.
-router.get("/allregisterusers", UserController.allRegisterUsers);
+router.get("/allregisterusers",authenticator, UserController.allRegisterUsers);
 router.post("/register", UserController.register);
 router.post("/login", UserController.login);
 router.get("/logout",authenticator,UserController.logout);
