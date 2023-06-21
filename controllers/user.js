@@ -20,33 +20,68 @@ exports.test = function (req, res) {
 };
 
 exports.register = async (req, res) => {
+
+ 
+
+
+
+
   if (req.body?.user_name && req.body?.password) {
     const checkUser = await User.find({ user_name: req.body.user_name });
+    const checkEmail = await User.findOne({ email: req.body.email });
+
+
+
+
+
+
+
+
     if (checkUser.length > 0) {
       appData["status"] = 4;
       appData["message"] = "Username already exist!";
       appData["data"] = [];
       appData["error"] = [];
       return res.status(403).send(appData);
-    } 
+    } else if(checkEmail){
+      appData["status"] = 4;
+      appData["message"] = "Email already exist!";
+      appData["data"] = [];
+      appData["error"] = [];
+      return res.status(403).send(appData);
+    }
     else {
+      let role = "user";
+      const { first_name, last_name, email, password,user_name } = req.body;
       bycrpt.hash(
         req.body.user_name + req.body.password,
         saltRounds,
         async (err, hash) => {
           if (!err) {
-            let body = {
-              ...req.body,
+            // let body = {
+            //   ...req.body,
+            //   password: hash,
+            //   key: util.create_UUID(),
+            // };
+            let newRecord = new User({
+              user_name,
               password: hash,
-              key: util.create_UUID(),
-            };
-            let newRecord = new User(body);
+              first_name,
+              last_name,
+              email,
+              role,
+            });
             newRecord.save((err, response) => {
-              console.log(response);
+             
               if (!err) {
                 response["password"] = null;
                 response;
-                res.status(200).send(response);
+
+                appData["appStatusCode"] = 0;
+                appData["message"] = "New User Created Successfully";
+                appData["data"] = [];
+                appData["error"] = [];
+                res.status(200).send(appData);
               } else {
                 res.status(400).send(err.message);
               }
@@ -103,6 +138,7 @@ exports.login = async (req, res) => {
                         }),
                         tokenExpiry: "365 days",
                         key: keyId,
+                        role: data.role,
                         status: 0,
                       });
                     } else {
