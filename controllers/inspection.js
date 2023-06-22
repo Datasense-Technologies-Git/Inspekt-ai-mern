@@ -346,6 +346,7 @@ const searchInspection = async (req, res) => {
               // { "$match": { "Orders": [] }},
               {$group: {
                   _id: "$_id",
+                  dateCreation: { $first:"$dt_CreatedOn"},
                   project_name: { $first: '$project_name'},
                   inspection_id: { $first: '$inspection_id'},
                   drone_operator: { $first: '$drone_operator'},
@@ -377,8 +378,10 @@ const searchInspection = async (req, res) => {
               {
                   let myArr = [];
                   docs.map((data,i)=>{
+                    console.log(data,'-------- date created');
                     myArr.push({
                       _id:data._id,
+                      date:data.dateCreation,
                       n_Deleted:data.n_Deleted,
                       project_name:data.project_name,
                       inspection_id:data.inspection_id,
@@ -449,6 +452,7 @@ const searchInspection = async (req, res) => {
               // { "$match": { "Orders": [] }},
               {$group: {
                   _id: "$_id",
+                  dateCreation: { $first:"$dt_CreatedOn"},
                   project_name: { $first: '$project_name'},
                   inspection_id: { $first: '$inspection_id'},
                   drone_operator: { $first: '$drone_operator'},
@@ -482,6 +486,7 @@ const searchInspection = async (req, res) => {
                   docs.map((data,i)=>{
                     myArr.push({
                       _id:data._id,
+                      date:data.dateCreation,
                       n_Deleted:data.n_Deleted,
                       project_name:data.project_name,
                       inspection_id:data.inspection_id,
