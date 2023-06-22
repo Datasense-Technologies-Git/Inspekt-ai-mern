@@ -47,7 +47,7 @@ mongoose.connect(
 
 app.get('/api/test',(req,res) => {
   res.status(200).json({
-    message:'Inspekt Ai Server working fine 1'
+    message:'Inspekt Ai Server working fine 2'
   })
 })
 app.use("/api/v1/ins", userRoutes);
