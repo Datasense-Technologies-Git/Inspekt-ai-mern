@@ -17,8 +17,7 @@ app.use(bodyParser.json({ limit: "150mb", extended: true }));
 app.use(bodyParser.urlencoded({ limit: "150mb", extended: true }));
 const userRoutes = require("./routes/routes");
 
-
-
+// const connectionURL1 = `mongodb+srv://dhilip:admin@cluster0.znp2m13.mongodb.net/testing?retryWrites=true&w=majority` 
 
 const connectionURL = `mongodb+srv://${process.env.MONGO_USER_NAME}:${process.env.MONGO_PASSWORd}@cluster0.znp2m13.mongodb.net/${process.env.MONGO_DATABASE}?retryWrites=true&w=majority` 
 
