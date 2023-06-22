@@ -8,8 +8,8 @@ const util = require("../helper/util");
 var appData = {
   appStatusCode: 0,
   message: "",
-  data: [],
-  error: [],
+  payloadJson: [],
+  error: "",
 };
 
 const saltRounds = 10;
@@ -40,13 +40,13 @@ exports.register = async (req, res) => {
     if (checkUser.length > 0) {
       appData["status"] = 4;
       appData["message"] = "Username already exist!";
-      appData["data"] = [];
+      appData["payloadJson"] = [];
       appData["error"] = [];
       return res.status(403).send(appData);
     } else if(checkEmail){
       appData["status"] = 4;
       appData["message"] = "Email already exist!";
-      appData["data"] = [];
+      appData["payloadJson"] = [];
       appData["error"] = [];
       return res.status(403).send(appData);
     }
@@ -75,11 +75,10 @@ exports.register = async (req, res) => {
              
               if (!err) {
                 response["password"] = null;
-                response;
-
+                // response;
                 appData["appStatusCode"] = 0;
                 appData["message"] = "New User Created Successfully";
-                appData["data"] = [];
+                appData["payloadJson"] = [];
                 appData["error"] = [];
                 res.status(200).send(appData);
               } else {
@@ -96,7 +95,7 @@ exports.register = async (req, res) => {
   else {
     appData["appStatusCode"] = 4;
     appData["message"] = "Invalid Details!";
-    appData["data"] = [];
+    appData["payloadJson"] = [];
     appData["error"] = [];
     res.status(403).send(appData);
   }
@@ -129,23 +128,30 @@ exports.login = async (req, res) => {
                   { new: true },
                   (error, data) => {
                     if (!error && result && data) {
-                      res.send({
-                        appStatusCode:0,
-                        message:"Login Successfully",
-                        token: util.generateAccessToken({
+
+                      
+
+                      appData["appStatusCode"] = 0;
+                      appData["message"] = "Login Successfully";
+                      appData["payloadJson"] = { 
+                        "data" :{
+                          "role": data.role,
+                          "token": util.generateAccessToken({
                           user_name: data.user_name,
                           password: data.password,
                         }),
-                        tokenExpiry: "365 days",
-                        key: keyId,
-                        role: data.role,
-                        status: 0,
-                      });
+                        "tokenExpiry": "365 days",
+                        "key": keyId,
+                      }}
+                    ;
+                      appData["error"] = "";
+                      res.send(appData);
+
                     } else {
                       appData["appStatusCode"] = 4;
                       appData["message"] = "Invalid credential";
-                      appData["data"] = [];
-                      appData["error"] = [];
+                      appData["payloadJson"] = [];
+                      appData["error"] = "";
                       res.send(appData);
                     }
                   }
@@ -153,8 +159,8 @@ exports.login = async (req, res) => {
               } else {
                       appData["appStatusCode"] = 4;
                       appData["message"] = "Error decrypting data";
-                      appData["data"] = [];
-                      appData["error"] = [];
+                      appData["payloadJson"] = [];
+                      appData["error"] = "";
                 res.send(appData);
               }
             }
@@ -162,8 +168,8 @@ exports.login = async (req, res) => {
         } else {
           appData["appStatusCode"] = 4;
           appData["message"] = "Invalid Credential..User not found.";
-          appData["data"] = [];
-          appData["error"] = [];
+          appData["payloadJson"] = [];
+          appData["error"] = "";
           res.send(appData);
         }
       });
@@ -171,15 +177,15 @@ exports.login = async (req, res) => {
     else{
       appData["appStatusCode"] = 4;
       appData["message"] = "Please enter username and password";
-      appData["data"] = [];
-      appData["error"] = [];
+      appData["payloadJson"] = [];
+      appData["error"] = "";
   res.send(appData);
     }
   } catch (error) {
     
       appData["appStatusCode"] = 4;
       appData["message"] = "Something went wrong";
-      appData["data"] = [];
+      appData["payloadJson"] = [];
       appData["error"] = error;
   res.send(appData);
 
@@ -194,14 +200,14 @@ exports.allRegisterUsers = async (req, res) => {
       
       appData["appStatusCode"] = 0;
       appData["message"] = `You have totally ${allUsers.length} Users`;
-      appData["data"] = allUsers;
+      appData["payloadJson"] = allUsers;
       appData["error"] = [];
       res.send(appData);
     } else {
       
       appData["appStatusCode"] = 0;
       appData["message"] = "Currently you don't have any Users";
-      appData["data"] = allUsers;
+      appData["payloadJson"] = allUsers;
       appData["error"] = [];
       res.send(appData);
     }
@@ -209,7 +215,7 @@ exports.allRegisterUsers = async (req, res) => {
   } catch (error) {
         appData["appStatusCode"] = 1;
         appData["message"] = "Something went wrong";
-        appData["data"] = [];
+        appData["payloadJson"] = [];
         appData["error"] = [error];
 
         res.send(appData);
@@ -221,7 +227,7 @@ exports.logout = async (req,res) => {
   {
     appData["appStatusCode"] = 0;
     appData["message"] = "Logout Successfully";
-    appData["data"] = [];
+    appData["payloadJson"] = [];
     appData["error"] = [];
     res.status(200).send(appData)
   }
