@@ -100,16 +100,15 @@ const getAllCustomers = async (req, res) => {
                       as: "product"
                   },
                   
-                  
               },
-              // {
-              //   $lookup: {
-              //     from: "inspections",
-              //     localField: 'customer_name',
-              //     foreignField: "product.cust_name",
-              //     as: "second"
-              // }
-              // },
+              {
+                $lookup: {
+                  from: "inspections",
+                  localField: 'product.project_name',
+                  foreignField: "project_name",
+                  as: "second"
+              }
+              },
               
               // { $unwind: "$product" },
               // { $match: { "product.n_Deleted": 1 } },
@@ -126,24 +125,27 @@ const getAllCustomers = async (req, res) => {
                   // c_Data: { $first: '$n_plan_data_limit'},
                   // n_StartPrice:{$min:"$product.n_plan_price"},
                   projects: {$push: "$product"},
-                  second: {$push: "$second"}
+                  project_inspections: {$push: "$second"}
               }},
-              {$sort: {"customer_name": 1}},
-              // { $limit: result.n_limit },
-              // { $skip: result.n_skip },
+              // {$sort: {"customer_name": result.sort}},
+              { $limit: result.n_limit },
+              { $skip: result.n_skip },
 
           ]).then(function(docs) 
           {
               if(docs)
               {
                   docs.map((data,i)=>{
-                     let a = data.projects.flat(1);
-                     data.projects = a;
-                     data.total_projects = a.length;
+                     let new_projects = data.projects.flat(1);
+                     let new_inspections = data.project_inspections.flat(1);
+                     data.projects = new_projects;
+                     data.project_inspections = new_inspections;
+                     data.total_projects = new_projects.length;
+                     data.total_inspections = new_inspections.length;
                   })
 
                   appData["appStatusCode"] = 0;
-                  appData["message"] = "Your all customers"
+                  appData["message"] = `Your all customers ${docs.length}`
                   appData["data"] = docs
                   appData["error"] = []
                   res.send(appData)
@@ -187,6 +189,14 @@ const getSingleCustomer = async (req, res) => {
           as: "product",
         },
       },
+      {
+        $lookup: {
+          from: "inspections",
+          localField: 'product.project_name',
+          foreignField: "project_name",
+          as: "second"
+      },
+    },
       // { $unwind: "$product" },
       // { $match: { "product.n_Deleted": 1 } },
       // { "$match": { "Orders": [] }},
@@ -201,15 +211,19 @@ const getSingleCustomer = async (req, res) => {
         // total_projects: { $sum: 1},
         // c_Data: { $first: '$n_plan_data_limit'},
         // n_StartPrice:{$min:"$product.n_plan_price"},
-        projects: {$push: "$product"}
+        projects: {$push: "$product"},
+        project_inspections: {$push: "$second"}
         },
       }
     ]).then(function (docs) {
       if (docs) {
         docs.map((data, i) => {
-          let a = data.projects.flat(1);
-          data.projects = a;
-          data.total_projects = a.length;
+          let new_project = data.projects.flat(1);
+          let new_inspection = data.project_inspections.flat(1);
+          data.projects = new_project;
+          data.project_inspections = new_inspection;
+          data.total_projects = new_project.length;
+          data.total_inspections = new_inspection.length;
         });
 
         appData["appStatusCode"] = 0;
