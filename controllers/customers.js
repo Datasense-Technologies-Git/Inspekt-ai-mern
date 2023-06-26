@@ -127,7 +127,7 @@ const getAllCustomers = async (req, res) => {
                   projects: {$push: "$product"},
                   project_inspections: {$push: "$second"}
               }},
-              // {$sort: {"customer_name": result.sort}},
+              {$sort: {"customer_name": result.sort}},
               { $limit: result.n_limit },
               { $skip: result.n_skip },
 
