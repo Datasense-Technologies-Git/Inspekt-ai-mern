@@ -89,6 +89,13 @@ const getAllCustomers = async (req, res) => {
     try {
       const result = req.body;
       let _search =  { n_Deleted: 1 };
+      if(result.searchTerm) {
+        _search['$or'] = [
+          { customer_name: { $regex: result.searchTerm, $options: "i" } },
+          { customer_email: { $regex: result.searchTerm, $options: "i" } },
+        ]
+      }
+      
         Customers.aggregate(
           [
               { $match: _search },
