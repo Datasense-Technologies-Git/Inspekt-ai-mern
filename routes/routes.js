@@ -7,6 +7,7 @@ var InspectionController = require("../controllers/inspectionsController")
 var projects = require("../controllers/projects")
 var inspection = require("../controllers/inspection");
 var customers = require("../controllers/customers");
+var countries = require("../controllers/countrylist");
 const authenticator = require("../middleware/auth");
 
 // a simple test url to check that all of our files are communicating correctly.
@@ -42,5 +43,7 @@ router.put("/deleteinspection/:id",authenticator,inspection.deleteInspection)
 router.post("/searchinspection",authenticator,inspection.searchInspection)
 router.post("/filterinspection",authenticator,inspection.filterInspection)
 router.put("/updateinspection/:id",authenticator,inspection.updateInspection)
+
+router.post("/countrylist",authenticator,countries.countryList  )
 
 module.exports = router;
