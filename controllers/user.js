@@ -136,6 +136,10 @@ exports.login = async (req, res) => {
                       appData["payloadJson"] = { 
                         "data" :{
                           "role": data.role,
+                          "user_name": data.user_name,
+                          "first_name": data.first_name,
+                          "last_name": data.last_name,
+                          "email": data.email,
                           "token": util.generateAccessToken({
                           user_name: data.user_name,
                           password: data.password,
