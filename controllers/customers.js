@@ -88,6 +88,8 @@ const createCustomer = async (req, res) => {
 const getAllCustomers = async (req, res) => {
     try {
       const result = req.body;
+      let temp_skip = ((result.n_skip) * result.n_limit);
+      let temp_limit = (result.n_skip + 1) * result.n_limit;
       let _search =  { n_Deleted: 1 };
       if(result.searchTerm) {
         _search['$or'] = [
@@ -135,21 +137,31 @@ const getAllCustomers = async (req, res) => {
                   project_inspections: {$push: "$second"}
               }},
               {$sort: {"customer_name": result.sort}},
-              { $limit: result.n_limit },
-              { $skip: result.n_skip },
+              // { $limit: result.n_limit },
+              // { $skip: result.n_skip },
+              {
+                $facet: {
+                  paginatedResults: [{ $skip: temp_skip }, { $limit: temp_limit }],
+                  totalCount: [
+                    {
+                      $count: 'count'
+                    }
+                  ]
+                }
+              }
 
           ]).then(function(docs) 
           {
               if(docs)
               {
-                  docs.map((data,i)=>{
-                     let new_projects = data.projects.flat(1);
-                     let new_inspections = data.project_inspections.flat(1);
-                     data.projects = new_projects;
-                     data.project_inspections = new_inspections;
-                     data.total_projects = new_projects.length;
-                     data.total_inspections = new_inspections.length;
-                  })
+                  // docs.map((data,i)=>{
+                  //    let new_projects = data.projects.flat(1);
+                  //    let new_inspections = data.project_inspections.flat(1);
+                  //    data.projects = new_projects;
+                  //    data.project_inspections = new_inspections;
+                  //    data.total_projects = new_projects.length;
+                  //    data.total_inspections = new_inspections.length;
+                  // })
 
                   appData["appStatusCode"] = 0;
                   appData["message"] = `Your all customers ${docs.length}`

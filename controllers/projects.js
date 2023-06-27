@@ -162,9 +162,6 @@ const retriveAllProjects = async (req, res) => {
     const result = req.body;
     let temp_skip = ((result.n_skip) * result.n_limit);
     let temp_limit = (result.n_skip + 1) * result.n_limit;
-    
-    console.log(temp_skip,"<<<<<<<<< temp_skip")
-    console.log(temp_limit,"<<<<<<<<< temp_limit")
     let _search =  { n_Deleted: 1 }
     if(result.searchTerm) {
       _search['$or'] = [
