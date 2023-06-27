@@ -134,7 +134,7 @@ const getAllCustomers = async (req, res) => {
                   projects: {$push: "$product"},
                   project_inspections: {$push: "$second"}
               }},
-              // {$sort: {"customer_name": result.sort}},
+              {$sort: {"customer_name": result.sort}},
               { $limit: result.n_limit },
               { $skip: result.n_skip },
 
@@ -549,6 +549,14 @@ const filterCustomer = async (req, res) => {
                   as: "project"
               }
           },
+          {
+            $lookup: {
+              from: "inspections",
+              localField: 'project.project_name',
+              foreignField: "project_name",
+              as: "second"
+          }
+          },
           
           // { $unwind: "$project" },
           // { $match: { "project.n_Deleted": 1 } },
@@ -564,7 +572,8 @@ const filterCustomer = async (req, res) => {
               // total_projects: { $sum: 1},
               // c_Data: { $first: '$n_plan_data_limit'},
               // n_StartPrice:{$min:"$project.n_plan_price"},
-              projects: {$push: "$project"}
+              projects: {$push: "$project"},
+              project_inspections: {$push: "$second"}
           }},
           {$sort: {"customer_name": 1}}
 
@@ -573,9 +582,12 @@ const filterCustomer = async (req, res) => {
           if(docs)
           {
               docs.map((data,i)=>{
-                 let a = data.projects.flat(1);
-                 data.projects = a;
-                 data.total_projects = a.length;
+                let new_projects = data.projects.flat(1);
+                let new_inspections = data.project_inspections.flat(1);
+                data.projects = new_projects;
+                data.project_inspections = new_inspections;
+                data.total_projects = new_projects.length;
+                data.total_inspections = new_inspections.length;
               })
 
               
