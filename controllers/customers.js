@@ -564,6 +564,9 @@ const searchCustomer = async (req, res) => {
 const filterCustomer = async (req, res) => {
   try {
     const custStatus = req.body.customer_status;
+    const result = req.body;
+      let temp_skip = ((result.n_skip) * result.n_limit);
+      let temp_limit = (result.n_skip + 1) * result.n_limit;
 
     Customers.aggregate(
       [
@@ -602,13 +605,23 @@ const filterCustomer = async (req, res) => {
               projects: {$push: "$project"},
               project_inspections: {$push: "$second"}
           }},
-          {$sort: {"customer_name": 1}}
+          {$sort: {"customer_name": 1}},
+          {
+            $facet: {
+              paginatedResults: [{ $limit: temp_limit },{ $skip: temp_skip }],
+              totalCount: [
+                {
+                  $count: 'count'
+                }
+              ]
+            }
+          }
 
       ]).then(function(docs) 
       {
           if(docs)
           {
-              docs.map((data,i)=>{
+            docs[0].paginatedResults.map((data,i)=>{
                 let new_projects = data.projects.flat(1);
                 let new_inspections = data.project_inspections.flat(1);
                 data.projects = new_projects;
