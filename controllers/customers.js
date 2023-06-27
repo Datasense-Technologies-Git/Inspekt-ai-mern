@@ -197,6 +197,9 @@ const getSingleCustomer = async (req, res) => {
     try {
       let customerId = req.body.customer_id;
       let _search =  { n_Deleted: 1,customer_id:customerId }
+      const result = req.body;
+      let temp_skip = ((result.n_skip) * result.n_limit);
+      let temp_limit = (result.n_skip + 1) * result.n_limit;
 
       Customers.aggregate([
       { $match: _search },
@@ -233,17 +236,29 @@ const getSingleCustomer = async (req, res) => {
         projects: {$push: "$product"},
         project_inspections: {$push: "$second"}
         },
+        
+
+      },
+      {
+        $facet: {
+          paginatedResults: [{ $skip: temp_skip }, { $limit: temp_limit }],
+          totalCount: [
+            {
+              $count: 'count'
+            }
+          ]
+        }
       }
     ]).then(function (docs) {
       if (docs) {
-        docs.map((data, i) => {
-          let new_project = data.projects.flat(1);
-          let new_inspection = data.project_inspections.flat(1);
-          data.projects = new_project;
-          data.project_inspections = new_inspection;
-          data.total_projects = new_project.length;
-          data.total_inspections = new_inspection.length;
-        });
+        // docs.map((data, i) => {
+        //   let new_project = data.projects.flat(1);
+        //   let new_inspection = data.project_inspections.flat(1);
+        //   data.projects = new_project;
+        //   data.project_inspections = new_inspection;
+        //   data.total_projects = new_project.length;
+        //   data.total_inspections = new_inspection.length;
+        // });
 
         appData["appStatusCode"] = 0;
         appData["message"] = `You have totally ${docs.length} customers`;
