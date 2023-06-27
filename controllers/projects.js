@@ -227,11 +227,12 @@ const retriveAllProjects = async (req, res) => {
     
     ]).then(function (docs) {
       if (docs) {
-        // docs.map((data, i) => {
-        //   let a = data.project_inspection.flat(1);
-        //   data.project_inspection = a;
-        //   data.total_inspection = a.length;
-        // });
+
+        docs[0].paginatedResults.map((data, i) => {
+          let new_project_inspection = data.project_inspection.flat(1);
+          data.project_inspection = new_project_inspection;
+          data.total_inspection = new_project_inspection.length;
+        });
 
         appData["appStatusCode"] = 0;
         appData["message"] = `we are get your projects`;
