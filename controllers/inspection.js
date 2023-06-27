@@ -60,7 +60,10 @@ const getAllInspections = async (req, res) => {
     try {
 
       const result = req.body;
+      let temp_skip = ((result.n_skip) * result.n_limit);
+      let temp_limit = (result.n_skip + 1) * result.n_limit;
       let _search =  { n_Deleted: 1 };
+
       if(result.searchTerm) {
         _search['$or'] = [
           {inspection_id: { $regex: result.searchTerm, $options: "i" }},
@@ -111,8 +114,18 @@ const getAllInspections = async (req, res) => {
                 // projects: {$push: "$project"}
             }},
             {$sort: {"inspection_id": 1}},
-              { $limit: result.n_limit },
-              { $skip: result.n_skip },
+            // { $limit: temp_limit },
+            // { $skip: temp_skip },
+              {
+                $facet: {
+                  paginatedResults: [{ $skip: temp_skip }, { $limit: temp_limit }],
+                  totalCount: [
+                    {
+                      $count: 'count'
+                    }
+                  ]
+                }
+              }
   
         ]).then(function(docs) 
         {
@@ -150,8 +163,9 @@ const getAllInspections = async (req, res) => {
                 })
                 appData["appStatusCode"] = 0;
                 appData["message"] = "Your all inspections"
-                appData["data"] = myArr
+                appData["data"] = docs
                 appData["error"] = []
+                
                 res.send(appData)
             } else {
                 appData["appStatusCode"] = 1;
