@@ -154,17 +154,17 @@ const getAllCustomers = async (req, res) => {
           {
               if(docs)
               {
-                  // docs.map((data,i)=>{
-                  //    let new_projects = data.projects.flat(1);
-                  //    let new_inspections = data.project_inspections.flat(1);
-                  //    data.projects = new_projects;
-                  //    data.project_inspections = new_inspections;
-                  //    data.total_projects = new_projects.length;
-                  //    data.total_inspections = new_inspections.length;
-                  // })
+                docs[0].paginatedResults.map((data,i)=>{
+                     let new_projects = data.projects.flat(1);
+                     let new_inspections = data.project_inspections.flat(1);
+                     data.projects = new_projects;
+                     data.project_inspections = new_inspections;
+                     data.total_projects = new_projects.length;
+                     data.total_inspections = new_inspections.length;
+                  })
 
                   appData["appStatusCode"] = 0;
-                  appData["message"] = `Your all customers ${docs.length}`
+                  appData["message"] = `Your all customers`
                   appData["data"] = docs
                   appData["error"] = []
                   res.send(appData)
@@ -251,14 +251,14 @@ const getSingleCustomer = async (req, res) => {
       }
     ]).then(function (docs) {
       if (docs) {
-        // docs.map((data, i) => {
-        //   let new_project = data.projects.flat(1);
-        //   let new_inspection = data.project_inspections.flat(1);
-        //   data.projects = new_project;
-        //   data.project_inspections = new_inspection;
-        //   data.total_projects = new_project.length;
-        //   data.total_inspections = new_inspection.length;
-        // });
+        docs[0].paginatedResults.map((data, i) => {
+          let new_project = data.projects.flat(1);
+          let new_inspection = data.project_inspections.flat(1);
+          data.projects = new_project;
+          data.project_inspections = new_inspection;
+          data.total_projects = new_project.length;
+          data.total_inspections = new_inspection.length;
+        });
 
         appData["appStatusCode"] = 0;
         appData["message"] = `You have totally ${docs.length} customers`;
