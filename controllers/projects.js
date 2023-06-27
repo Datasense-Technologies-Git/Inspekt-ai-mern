@@ -160,7 +160,11 @@ const createProject = async (req, res) => {
 const retriveAllProjects = async (req, res) => {
   try {
     const result = req.body;
+    let temp_skip = ((result.n_skip) * result.n_limit);
+    let temp_limit = (result.n_skip + 1) * result.n_limit;
     
+    console.log(temp_skip,"<<<<<<<<< temp_skip")
+    console.log(temp_limit,"<<<<<<<<< temp_limit")
     let _search =  { n_Deleted: 1 }
     if(result.searchTerm) {
       _search['$or'] = [
@@ -211,18 +215,29 @@ const retriveAllProjects = async (req, res) => {
         },
       },
       { $sort: { project_name: 1 } },
-      { $limit: result.n_limit },
-      { $skip: result.n_skip },
+      // { $limit: result.n_limit },
+      // { $skip: result.n_skip },
+      {
+        $facet: {
+          paginatedResults: [{ $skip: temp_skip }, { $limit: temp_limit }],
+          totalCount: [
+            {
+              $count: 'count'
+            }
+          ]
+        }
+      }
+    
     ]).then(function (docs) {
       if (docs) {
-        docs.map((data, i) => {
-          let a = data.project_inspection.flat(1);
-          data.project_inspection = a;
-          data.total_inspection = a.length;
-        });
+        // docs.map((data, i) => {
+        //   let a = data.project_inspection.flat(1);
+        //   data.project_inspection = a;
+        //   data.total_inspection = a.length;
+        // });
 
         appData["appStatusCode"] = 0;
-        appData["message"] = `You have totally ${docs.length} projects`;
+        appData["message"] = `we are get your projects`;
         appData["data"] = docs;
         appData["error"] = [];
         res.send(appData);
@@ -285,7 +300,8 @@ const retriveSingleProject = async (req, res) => {
           // inspection :{$first:'$inspection'},
           project_inspection: { $push: "$projects" },
         },
-      }
+        
+      },
     ]).then(function (docs) {
       if (docs) {
         console.log(docs ,'----- ');
@@ -297,7 +313,7 @@ const retriveSingleProject = async (req, res) => {
         });
 
         appData["appStatusCode"] = 0;
-        appData["message"] = `You have totally ${docs.length} projects`;
+        appData["message"] = `You have totally ${docs.length} projects234`;
         appData["data"] = docs;
         appData["error"] = [];
         res.send(appData);
@@ -500,7 +516,7 @@ const filterProject = async (req, res) => {
           });
   
           appData["appStatusCode"] = 0;
-          appData["message"] = `You have totally ${docs.length} projects`;
+          appData["message"] = `You have totally ${docs.length} projects345`;
           appData["data"] = docs;
           appData["error"] = [];
           res.send(appData);
@@ -565,7 +581,7 @@ const filterProject = async (req, res) => {
           });
   
           appData["appStatusCode"] = 0;
-          appData["message"] = `You have totally ${docs.length} projects`;
+          appData["message"] = `You have totally ${docs.length} projects456`;
           appData["data"] = docs;
           appData["error"] = [];
           res.send(appData);
@@ -681,7 +697,7 @@ const searchProject = async (req, res) => {
         });
 
         appData["appStatusCode"] = 0;
-        appData["message"] = `You have totally ${docs.length} projects`;
+        appData["message"] = `You have totally ${docs.length} projects567`;
         appData["data"] = docs;
         appData["error"] = [];
         res.send(appData);
