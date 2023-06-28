@@ -173,9 +173,20 @@ const retriveAllProjects = async (req, res) => {
         { country: { $regex: result.searchTerm, $options: "i" } }
       ]
     }
-    // if (result.country) {
+    if ((result.country && result.country.length > 0) && (result.customer && result.customer.length > 0)) {
+        
+      _search['$and'] = [
+        {country: { $in: result.country }},
+        {cust_name: { $in: result.customer }},
+      ]
+    }
+    else if (result.country || result.customer) {
       
-    // }
+      _search['$or'] = [
+        {country: { $in: result.country }},
+        {cust_name: { $in: result.customer }},
+      ]
+    }
 
     Projects.aggregate([
       { $match: _search },

@@ -88,6 +88,7 @@ const createCustomer = async (req, res) => {
 const getAllCustomers = async (req, res) => {
     try {
       const result = req.body;
+
       let temp_skip = ((result.n_skip) * result.n_limit);
       let temp_limit = (result.n_skip + 1) * result.n_limit;
       let _search =  { n_Deleted: 1 };
@@ -98,6 +99,12 @@ const getAllCustomers = async (req, res) => {
           { customer_email: { $regex: result.searchTerm, $options: "i" } },
         ]
       }
+
+      if(result.customer_status === 0 || result.customer_status === 1 ) {
+  
+        _search['n_Status'] = {$eq: result.customer_status}
+      }
+
       
         Customers.aggregate(
           [
