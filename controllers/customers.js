@@ -91,6 +91,7 @@ const getAllCustomers = async (req, res) => {
       let temp_skip = ((result.n_skip) * result.n_limit);
       let temp_limit = (result.n_skip + 1) * result.n_limit;
       let _search =  { n_Deleted: 1 };
+      
       if(result.searchTerm) {
         _search['$or'] = [
           { customer_name: { $regex: result.searchTerm, $options: "i" } },
