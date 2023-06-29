@@ -313,10 +313,15 @@ const retriveSingleProject = async (req, res) => {
       },
     ]).then(function (docs) {
       if (docs) {
-        console.log(docs ,'----- ');
         docs.map((data, i) => {
           let a = data.project_inspection.flat(1);
-          data.project_inspection = a;
+          let latest = [];
+          a.map((el)=>{
+            if (el.n_Deleted === 1) {
+              latest.push(el)
+            }
+          })
+          data.project_inspection = latest;
           data.total_inspection = a.length;
           
         });
