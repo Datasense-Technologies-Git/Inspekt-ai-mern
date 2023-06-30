@@ -247,13 +247,9 @@ const retriveAllProjects = async (req, res) => {
                 latest.push(el)
               }
             })
-
-
-
           data.project_inspection = latest;
           data.total_inspection = latest.length;
         });
-
         // docs.map((data, i) => {
         //   let a = data.project_inspection.flat(1);
         //   let latest = [];
