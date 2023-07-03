@@ -74,7 +74,7 @@ const inspectionSchema = new mongoose.Schema({
       type: String,
       required: true
     },
-    option_value: {
+    operation_value: {
       type: String,
       required: true
     },
