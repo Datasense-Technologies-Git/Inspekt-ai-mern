@@ -112,7 +112,7 @@ const getAllInspections = async (req, res) => {
                 regulatory_value: {$first: '$title.regulatory_value'},
                 asset_value: {$first: '$title.asset_value'},
                 cost_value: {$first: '$title.cost_value'},
-                operation_value: {$first: '$title.option_value'},
+                operation_value: {$first: '$title.operation_value'},
                 
                 // total_projects: { $sum: 1},
                 // c_Data: { $first: '$n_plan_data_limit'},
