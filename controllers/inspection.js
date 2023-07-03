@@ -58,7 +58,8 @@ const addInspection = async (req, res) => {
 
 const getAllInspections = async (req, res) => {
     try {
-
+      // const projectNameList = req.body.project;
+      // const droneOpNameList = req.body.droneoperator;
       const result = req.body;
       let temp_skip = ((result.n_skip) * result.n_limit);
       let temp_limit = (result.n_skip + 1) * result.n_limit;
@@ -71,22 +72,27 @@ const getAllInspections = async (req, res) => {
           {drone_operator: { $regex: result.searchTerm, $options: "i" }},
         ]
       }
+      
+      if ((result.project && result.project.length > 0) && (result.droneoperator && result.droneoperator.length > 0)) {
+        
+        _search['$and'] = [
+          {project_name: { $in: result.project }},
+          {drone_operator: { $in: result.droneoperator }},
+        ]
+      }
+      else if (result.project || result.droneoperator) {
+        
+        _search['$or'] = [
+          {project_name: { $in: result.project }},
+          {drone_operator: { $in: result.droneoperator }},
+        ]
+      }
+
+      
 
       Inspections.aggregate(
         [
             { $match: _search},
-            // {
-            //     $lookup: {
-            //         from: "projects",
-            //         localField: 'customer_name',
-            //         foreignField: "cust_name",
-            //         as: "project"
-            //     }
-            // },
-            
-            // { $unwind: "$project" },
-            // { $match: { "project.n_Deleted": 1 } },
-            // { "$match": { "Orders": [] }},
             {$group: {
                 _id: "$_id",
                 dateCreation: { $first:"$dt_CreatedOn"},
@@ -106,7 +112,7 @@ const getAllInspections = async (req, res) => {
                 regulatory_value: {$first: '$title.regulatory_value'},
                 asset_value: {$first: '$title.asset_value'},
                 cost_value: {$first: '$title.cost_value'},
-                operation_value: {$first: '$title.option_value'},
+                operation_value: {$first: '$title.operation_value'},
                 
                 // total_projects: { $sum: 1},
                 // c_Data: { $first: '$n_plan_data_limit'},
@@ -135,7 +141,7 @@ const getAllInspections = async (req, res) => {
                 docs.map((data,i)=>{
                   myArr.push({
                     _id:data._id,
-                    date:data.dateCreation,
+                    dateCreation:data.dateCreation,
                     n_Deleted:data.n_Deleted,
                     project_name:data.project_name,
                     inspection_id:data.inspection_id,
@@ -334,8 +340,6 @@ const searchInspection = async (req, res) => {
       
       const projectNameList = req.body.project;
       const droneOpNameList = req.body.droneoperator;
-      console.log(projectNameList ,'------ projectNameList');
-      console.log(droneOpNameList ,'------ droneOpNameList');
       if ( projectNameList.length > 0 && droneOpNameList.length > 0 ) {
         Inspections.aggregate(
           [
@@ -392,7 +396,7 @@ const searchInspection = async (req, res) => {
               {
                   let myArr = [];
                   docs.map((data,i)=>{
-                    console.log(data,'-------- date created');
+                    
                     myArr.push({
                       _id:data._id,
                       date:data.dateCreation,
@@ -442,7 +446,7 @@ const searchInspection = async (req, res) => {
           })
       }
       else{
-        console.log('------ else');
+        
         Inspections.aggregate(
           [
               { $match: {n_Deleted: 1,
@@ -500,7 +504,7 @@ const searchInspection = async (req, res) => {
                   docs.map((data,i)=>{
                     myArr.push({
                       _id:data._id,
-                      date:data.dateCreation,
+                      dateCreation:data.dateCreation,
                       n_Deleted:data.n_Deleted,
                       project_name:data.project_name,
                       inspection_id:data.inspection_id,
