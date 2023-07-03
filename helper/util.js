@@ -15,3 +15,11 @@ const accessTokenKey = require("../config/config")
 module.exports.generateAccessToken = (user) => {
     return jwt.sign(user, accessTokenKey, { expiresIn: "365d" });
   }
+
+
+  module.exports.isEmail = (email) => {
+    var emailFormat = /^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/;
+    if (email !== '' && email.match(emailFormat)) { return true; }
+    
+    return false;
+}

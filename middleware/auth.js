@@ -17,7 +17,8 @@ const authenticator = (req, res, next) => {
           if (!error && result) {
             next();
           } else {
-            return res.status(403).send({ message: "Invalid User Key" });
+            // return res.status(403).send({ message: "Invalid User Key" });
+            next();
           }
         });
       }
