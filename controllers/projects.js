@@ -238,7 +238,7 @@ const retriveAllProjects = async (req, res) => {
     
     ]).then(function (docs) {
       if (docs) {
-        console.log(docs ,'-------------- 5 36');
+        
         docs[0].paginatedResults.map((data, i) => {
           let new_project_inspection = data.project_inspection.flat(1);
           let latest = [];

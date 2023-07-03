@@ -340,8 +340,6 @@ const searchInspection = async (req, res) => {
       
       const projectNameList = req.body.project;
       const droneOpNameList = req.body.droneoperator;
-      console.log(projectNameList ,'------ projectNameList');
-      console.log(droneOpNameList ,'------ droneOpNameList');
       if ( projectNameList.length > 0 && droneOpNameList.length > 0 ) {
         Inspections.aggregate(
           [
@@ -398,7 +396,7 @@ const searchInspection = async (req, res) => {
               {
                   let myArr = [];
                   docs.map((data,i)=>{
-                    console.log(data,'-------- date created');
+                    
                     myArr.push({
                       _id:data._id,
                       date:data.dateCreation,
@@ -448,7 +446,7 @@ const searchInspection = async (req, res) => {
           })
       }
       else{
-        console.log('------ else');
+        
         Inspections.aggregate(
           [
               { $match: {n_Deleted: 1,
