@@ -232,6 +232,87 @@ const getSingleInspection = async (req, res) => {
     }
 }
 
+const singleProjectInspections = async (req, res) => {
+try {
+  const result = req.body;
+  let temp_skip = ((result.n_skip) * result.n_limit);
+    let temp_limit = (result.n_skip + 1) * result.n_limit;
+  Inspections.aggregate(
+    [
+        { $match: {n_Deleted: 1,project_name:result.project_name}},
+        {$group: {
+            _id: "$_id",
+            dateCreation: { $first:"$dt_CreatedOn"},
+            project_name: { $first: '$project_name'},
+            inspection_id: { $first: '$inspection_id'},
+            drone_operator: { $first: '$drone_operator'},
+            model_url_3D: { $first: '$model_url_3D'},
+            n_Deleted: {$first: '$n_Deleted'},
+            total_defects: {$first: '$Overview.total_defects'},
+            construction_quality: {$first: '$Overview.construction_quality'},
+            energy_loss: {$first: '$Overview.energy_loss'},
+            urgent: {$first: '$urgency.urgent'},
+            medium: {$first: '$urgency.medium'},
+            low: {$first: '$urgency.low'},
+            safety_value: {$first: '$title.safety_value'},
+            utility_value: {$first: '$title.utility_value'},
+            regulatory_value: {$first: '$title.regulatory_value'},
+            asset_value: {$first: '$title.asset_value'},
+            cost_value: {$first: '$title.cost_value'},
+            operation_value: {$first: '$title.operation_value'},
+            
+            // total_projects: { $sum: 1},
+            // c_Data: { $first: '$n_plan_data_limit'},
+            // n_StartPrice:{$min:"$project.n_plan_price"},
+            // projects: {$push: "$project"}
+        }},
+        { $sort: { inspection_id: 1 } },
+        {
+          $facet: {
+            paginatedResults: [{ $skip: temp_skip }, { $limit: temp_limit }],
+            totalCount: [
+              {
+                $count: 'count'
+              }
+            ]
+          }
+        }
+
+    ]).then(function(docs) 
+    {
+        if(docs)
+        {
+           
+            appData["appStatusCode"] = 0;
+            appData["message"] = "Your all inspections for this project"
+            appData["data"] = docs
+            appData["error"] = []
+            res.send(appData);
+        } else {
+            appData["appStatusCode"] = 1;
+            appData["message"] = ["Something went wrong"]
+            appData["data"] = []
+            appData["error"] = []
+            res.send(appData)  
+        } 
+    }).catch((err)=>{
+      appData["appStatusCode"] = 2;
+      appData["message"] = "some error"
+      appData["data"] = []
+      appData["error"] = err
+      res.send(appData)
+    })
+} catch (error) {
+        appData["status"] = 404;
+        appData["appStatusCode"] = 2;
+        appData["message"] = "Oopsss, Something went wrong !";
+        appData['data'] = [];
+        appData["error"] = error;
+        res.send(appData)
+}
+}
+
+
 const deleteInspection = async(req,res)=>{
     try {
         if (req.body.n_Deleted === 0 || req.body.n_Deleted === 1) {
@@ -340,8 +421,8 @@ const searchInspection = async (req, res) => {
       
       const projectNameList = req.body.project;
       const droneOpNameList = req.body.droneoperator;
-      console.log(projectNameList ,'------ projectNameList');
-      console.log(droneOpNameList ,'------ droneOpNameList');
+      
+      
       if ( projectNameList.length > 0 && droneOpNameList.length > 0 ) {
         Inspections.aggregate(
           [
@@ -398,7 +479,7 @@ const searchInspection = async (req, res) => {
               {
                   let myArr = [];
                   docs.map((data,i)=>{
-                    console.log(data,'-------- date created');
+                    
                     myArr.push({
                       _id:data._id,
                       date:data.dateCreation,
@@ -448,7 +529,7 @@ const searchInspection = async (req, res) => {
           })
       }
       else{
-        console.log('------ else');
+        
         Inspections.aggregate(
           [
               { $match: {n_Deleted: 1,
@@ -646,4 +727,4 @@ const searchInspection = async (req, res) => {
     }
 }
 
-module.exports ={ addInspection,getAllInspections,getSingleInspection,deleteInspection,searchInspection,filterInspection,updateInspection }
+module.exports ={ addInspection,getAllInspections,getSingleInspection,deleteInspection,searchInspection,filterInspection,updateInspection,singleProjectInspections }

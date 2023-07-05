@@ -21,7 +21,7 @@ const createCustomer = async (req, res) => {
           const checkEmail = await Customers.findOne({
             customer_email: req.body.customer_email,
           });
-          // console.log(util.emailRegexp());
+          // 
           if (checkUserName || checkCustomerName || checkEmail) {
             
             appData["appStatusCode"] = 0;
@@ -164,13 +164,28 @@ const getAllCustomers = async (req, res) => {
               {
                 docs[0].paginatedResults.map((data,i)=>{
                      let new_projects = data.projects.flat(1);
-                     let new_inspections = data.project_inspections.flat(1);
-                     data.projects = new_projects;
-                     data.project_inspections = new_inspections;
-                     data.total_projects = new_projects.length;
-                     data.total_inspections = new_inspections.length;
+                     let latest_project = [];
+                     new_projects.map((el)=>{
+                         if (el.n_Deleted === 1) {
+                          latest_project.push(el)
+                         }
+                       })
+                       data.projects = latest_project.length;
                   })
 
+                  docs[0].paginatedResults.map((data,i)=>{
+                    let new_inspections = data.project_inspections.flat(1);
+                     let latest_inspections = [];
+                     new_inspections.map((el)=>{
+                      
+                         if (el.n_Deleted === 1) {
+                          latest_inspections.push(el)
+                         }
+                       })
+                      //  
+                     data.project_inspections = latest_inspections.length;
+                 })
+                  
                   appData["appStatusCode"] = 0;
                   appData["message"] = `Your all customers`
                   appData["data"] = docs
@@ -338,7 +353,7 @@ const updateCustomer = async (req, res) => {
         //     res.send(appData);
         //   } 
         //   else{
-          console.log(updatedData);
+          
             const result = await Customers.findOneAndUpdate(
                 id, updatedData, options
             )
@@ -431,7 +446,7 @@ const deleteCustomer = async(req,res)=>{
 
 const customerStatus = async(req,res)=>{
     try {
-      console.log(req.body.n_Status);
+      
         if(req.body.n_Status === 0 || req.body.n_Status === 1){
           
           const id = { customer_id: req.params.id };
@@ -468,7 +483,7 @@ const customerStatus = async(req,res)=>{
           res.send(appData);
         }
         else{
-          console.log('---------- 2');
+          
           
           appData["appStatusCode"] = 0;
           appData["message"] = "Invalid customer status code";
@@ -479,7 +494,7 @@ const customerStatus = async(req,res)=>{
         }
         
       } catch (error) {
-        console.log('------- 3');
+        
         
         appData["appStatusCode"] = 2;
         appData["message"] = "Sorry, Something went wrong";
