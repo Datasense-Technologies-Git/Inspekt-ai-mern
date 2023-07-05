@@ -21,7 +21,7 @@ const createCustomer = async (req, res) => {
           const checkEmail = await Customers.findOne({
             customer_email: req.body.customer_email,
           });
-          
+          // 
           if (checkUserName || checkCustomerName || checkEmail) {
             
             appData["appStatusCode"] = 0;
@@ -164,13 +164,28 @@ const getAllCustomers = async (req, res) => {
               {
                 docs[0].paginatedResults.map((data,i)=>{
                      let new_projects = data.projects.flat(1);
-                     let new_inspections = data.project_inspections.flat(1);
-                     data.projects = new_projects;
-                     data.project_inspections = new_inspections;
-                     data.total_projects = new_projects.length;
-                     data.total_inspections = new_inspections.length;
+                     let latest_project = [];
+                     new_projects.map((el)=>{
+                         if (el.n_Deleted === 1) {
+                          latest_project.push(el)
+                         }
+                       })
+                       data.projects = latest_project.length;
                   })
 
+                  docs[0].paginatedResults.map((data,i)=>{
+                    let new_inspections = data.project_inspections.flat(1);
+                     let latest_inspections = [];
+                     new_inspections.map((el)=>{
+                      
+                         if (el.n_Deleted === 1) {
+                          latest_inspections.push(el)
+                         }
+                       })
+                      //  
+                     data.project_inspections = latest_inspections.length;
+                 })
+                  
                   appData["appStatusCode"] = 0;
                   appData["message"] = `Your all customers`
                   appData["data"] = docs

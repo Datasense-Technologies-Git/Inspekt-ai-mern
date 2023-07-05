@@ -44,7 +44,7 @@ const UserSchema = new Schema({
       }
     },
   },
-  email:{
+  user_email:{
     type:String,
     required:[true, "Email required"],
     trim: true
@@ -55,7 +55,9 @@ const UserSchema = new Schema({
     enum: ["user", "admin", "super-admin"],
     default: "user",
   },
-  key : {type : String}
+  n_Status: { type: Number,required:true, default: 1 },
+  n_Deleted: { type: Number, default: 1 },
+  dt_CreatedOn: { type: Date, default: Date.now },
 },{strict: false,versionKey: false});
 
 const User = mongoose.model("User", UserSchema, "user");
