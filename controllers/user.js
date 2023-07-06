@@ -100,25 +100,22 @@ exports.logIn1 = async (req, res) => {
     let result = req.body;
     if (result.user_name || result.password) {
       const userName = await User.findOne({ user_name: result.user_name });
-      const userPass = await bcrypt.compare(result.password, userName.password);
-
-      // console.log(userName,"<<<< USERNAME")
-      // console.log(userPass,"<<<< userPass")
-
-
       if (!userName) {
         appData["appStatusCode"] = 4;
         appData["message"] = "User not found";
         appData["payloadJson"] = [];
         appData["error"] = "";
         res.send(appData);
-      } else if (!userPass === true) {
+      } 
+      const userPass = await bcrypt.compare(result.password, userName.password);
+      if (!userPass ) {
         appData["appStatusCode"] = 4;
         appData["message"] = "Invalid credential";
         appData["payloadJson"] = [];
         appData["error"] = "";
         res.send(appData);
-      } else {
+      } 
+      else {
         // res.json("login successfully");
         const tokenVerify = util.generateAccessToken({
           user_name: result.user_name,
