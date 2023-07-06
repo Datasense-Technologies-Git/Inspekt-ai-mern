@@ -130,7 +130,7 @@ exports.logIn1 = async (req, res) => {
             user_name: userName.user_name,
             first_name: userName.first_name,
             last_name: userName.last_name,
-            email: userName.email,
+            email: userName.user_email,
             token: tokenVerify,
             tokenExpiry: "365 days",
           },
