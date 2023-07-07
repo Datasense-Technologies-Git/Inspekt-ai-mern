@@ -11,9 +11,9 @@ var countries = require("../controllers/countrylist");
 const authenticator = require("../middleware/auth");
 
 // a simple test url to check that all of our files are communicating correctly.
-router.get("/allregisterusers",authenticator, UserController.allRegisterUsers);
-router.post("/register", UserController.register);
-router.post("/login", UserController.login);
+
+// router.post("/register", UserController.register);
+router.post("/login", UserController.logIn1);
 router.get("/logout",authenticator,UserController.logout);
 
 // router.post("/addInspections",authenticator,InspectionController.addInspections)
@@ -26,6 +26,7 @@ router.post("/filterproject",authenticator,projects.filterProject);
 router.put("/updateproject/:id",authenticator,projects.updateProject);
 router.put("/deleteproject/:id",authenticator,projects.deleteProject);
 router.post("/searchproject",authenticator,projects.searchProject);
+router.post("/singlecustomerprojects",authenticator,projects.singleCustomerProjects);
 
 router.post("/createcustomer",authenticator, customers.createCustomer);
 router.post("/allcustomers",authenticator, customers.getAllCustomers);
@@ -43,7 +44,16 @@ router.put("/deleteinspection/:id",authenticator,inspection.deleteInspection)
 router.post("/searchinspection",authenticator,inspection.searchInspection)
 router.post("/filterinspection",authenticator,inspection.filterInspection)
 router.put("/updateinspection/:id",authenticator,inspection.updateInspection)
+router.post("/singleprojectinspections",authenticator,inspection.singleProjectInspections)
 
 router.post("/countrylist",authenticator,countries.countryList  )
+
+router.post("/createuser", UserController.createUser);
+router.post("/allregisterusers", UserController.allRegisterUsers);
+router.post("/singleuser", UserController.getSingleUser);
+router.put("/updateuser/:id",UserController.updateUser );
+router.put("/deleteuser/:id", UserController.deleteUser);
+router.put("/userstatus/:id", UserController.userStatus);
+router.post("/filteruser",UserController.filterUser);
 
 module.exports = router;

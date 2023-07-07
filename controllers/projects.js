@@ -173,9 +173,20 @@ const retriveAllProjects = async (req, res) => {
         { country: { $regex: result.searchTerm, $options: "i" } }
       ]
     }
-    // if (result.country) {
+    if ((result.country && result.country.length > 0) && (result.customer && result.customer.length > 0)) {
+        
+      _search['$and'] = [
+        {country: { $in: result.country }},
+        {cust_name: { $in: result.customer }},
+      ]
+    }
+    else if (result.country || result.customer) {
       
-    // }
+      _search['$or'] = [
+        {country: { $in: result.country }},
+        {cust_name: { $in: result.customer }},
+      ]
+    }
 
     Projects.aggregate([
       { $match: _search },
@@ -227,12 +238,30 @@ const retriveAllProjects = async (req, res) => {
     
     ]).then(function (docs) {
       if (docs) {
-
+        
         docs[0].paginatedResults.map((data, i) => {
           let new_project_inspection = data.project_inspection.flat(1);
-          data.project_inspection = new_project_inspection;
-          data.total_inspection = new_project_inspection.length;
+          let latest = [];
+          new_project_inspection.map((el)=>{
+              if (el.n_Deleted === 1) {
+                latest.push(el)
+              }
+            })
+          data.project_inspection = latest;
+          data.total_inspection = latest.length;
         });
+        // docs.map((data, i) => {
+        //   let a = data.project_inspection.flat(1);
+        //   let latest = [];
+        //   a.map((el)=>{
+        //     if (el.n_Deleted === 1) {
+        //       latest.push(el)
+        //     }
+        //   })
+        //   data.project_inspection = latest;
+        //   data.total_inspection = a.length;
+          
+        // });
 
         appData["appStatusCode"] = 0;
         appData["message"] = `we are get your projects`;
@@ -266,14 +295,14 @@ const retriveSingleProject = async (req, res) => {
 
     Projects.aggregate([
       { $match: _search },
-      {
-        $lookup: {
-          from: "inspections",
-          localField: "project_name",
-          foreignField: "project_name",
-          as: "projects",
-        },
-      },
+      // {
+      //   $lookup: {
+      //     from: "inspections",
+      //     localField: "project_name",
+      //     foreignField: "project_name",
+      //     as: "projects",
+      //   },
+      // },
       // { $unwind: "$product" },
       // { $match: { "product.n_Deleted": 1 } },
       // { "$match": { "Orders": [] }},
@@ -296,19 +325,24 @@ const retriveSingleProject = async (req, res) => {
           n_Deleted: { $first: "$n_Deleted" },
           image: { $first: "$image" },
           // inspection :{$first:'$inspection'},
-          project_inspection: { $push: "$projects" },
+          // project_inspection: { $push: "$projects" },
         },
         
       },
     ]).then(function (docs) {
       if (docs) {
-        console.log(docs ,'----- ');
-        docs.map((data, i) => {
-          let a = data.project_inspection.flat(1);
-          data.project_inspection = a;
-          data.total_inspection = a.length;
+        // docs.map((data, i) => {
+        //   let a = data.project_inspection.flat(1);
+        //   let latest = [];
+        //   a.map((el)=>{
+        //     if (el.n_Deleted === 1) {
+        //       latest.push(el)
+        //     }
+        //   })
+        //   data.project_inspection = latest;
+        //   data.total_inspection = latest.length;
           
-        });
+        // });
 
         appData["appStatusCode"] = 0;
         appData["message"] = `You have totally ${docs.length} projects234`;
@@ -333,6 +367,98 @@ const retriveSingleProject = async (req, res) => {
     res.send(appData);
   }
 };
+
+const singleCustomerProjects = async (req, res) => {
+  try {
+
+    const result = req.body;
+    let temp_skip = ((result.n_skip) * result.n_limit);
+    let temp_limit = (result.n_skip + 1) * result.n_limit;
+
+    let _search =  { n_Deleted: 1,cust_name:result.cust_name }
+
+    Projects.aggregate([
+      { $match: _search },
+      {
+        $lookup: {
+          from: "inspections",
+          localField: "project_name",
+          foreignField: "project_name",
+          as: "project_inspection",
+        },
+      },
+      // { $match: { "project_inspection.n_Deleted": 1 } },
+      {
+        $group: {
+          _id: "$_id",
+          dateCreation: { $first:"$dt_CreatedOn"},
+          project_name: { $first: "$project_name" },
+          project_id: { $first: "$project_id" },
+          cust_name: { $first: "$cust_name" },
+          description: { $first: "$description" },
+          built_year: { $first: "$built_year" },
+          no_of_floors: { $first: "$no_of_floors" },
+          street_1: { $first: "$street_1" },
+          street_2: { $first: "$street_2" },
+          city: { $first: "$city" },
+          zipcode: { $first: "$zipcode" },
+          country: { $first: "$country" },
+          state: { $first: "$state" },
+          n_Deleted: { $first: "$n_Deleted" },
+          image: { $first: "$image" },
+          // inspection :{$first:'$inspection'},
+          project_inspection: { $push: "$project_inspection" },
+        },
+        
+      },
+      { $sort: { project_name: 1 } },
+      {
+        $facet: {
+          paginatedResults: [{ $skip: temp_skip }, { $limit: temp_limit }],
+          totalCount: [
+            {
+              $count: 'count'
+            }
+          ]
+        }
+      }
+    ]).then(function (docs) {
+      if (docs) {
+        docs[0].paginatedResults.map((data, i) => {
+          let new_project_inspection = data.project_inspection.flat(1);
+          let latest_pro_inspection = [];
+          new_project_inspection.map((el)=>{
+            if (el.n_Deleted === 1) {
+              latest_pro_inspection.push(el)
+            }
+          })
+          data.project_inspection = latest_pro_inspection;
+        });
+        
+        appData["appStatusCode"] = 0;
+        appData["message"] = `You have totally ${docs.length} projects234`;
+        appData["data"] = docs;
+        appData["error"] = [];
+        res.send(appData);
+      } else {
+        appData["appStatusCode"] = 0;
+        appData["message"] = ["Something went wrong"];
+        appData["data"] = [];
+        appData["error"] = [];
+        res.send(appData);
+      }
+    });
+  } 
+  catch (error) {
+    appData["appStatusCode"] = 2;
+    appData["message"] = "Something went wrong";
+    appData["data"] = [];
+    appData["error"] = error;
+
+    res.send(appData);
+  }
+};
+
 
 const updateProject = async (req, res) => {
   try {
@@ -724,4 +850,5 @@ module.exports = {
   updateProject,
   deleteProject,
   searchProject,
+  singleCustomerProjects
 };
