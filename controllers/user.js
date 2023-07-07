@@ -232,8 +232,8 @@ exports.allRegisterUsers = async (req, res) => {
   try {
     const result = req.body;
 
-    // let temp_skip = ((result.n_skip) * result.n_limit);
-    // let temp_limit = (result.n_skip + 1) * result.n_limit;
+    let temp_skip = ((result.n_skip) * result.n_limit);
+    let temp_limit = (result.n_skip + 1) * result.n_limit;
     let _search = { n_Deleted: 1 };
 
     if (result.searchTerm) {
@@ -243,10 +243,10 @@ exports.allRegisterUsers = async (req, res) => {
       ];
     }
 
-    // if(result.customer_status === 0 || result.customer_status === 1 ) {
+    if(result.user_status === 0 || result.user_status === 1 ) {
 
-    //   _search['n_Status'] = {$eq: result.customer_status}
-    // }
+      _search['n_Status'] = {$eq: result.user_status}
+    }
 
     User.aggregate([
       { $match: _search },
@@ -281,10 +281,10 @@ exports.allRegisterUsers = async (req, res) => {
           // project_inspections: {$push: "$second"}
         },
       },
-      { $sort: { user_name: 1 } },
+      { $sort: { user_name: result.sort } },
       {
         $facet: {
-          paginatedResults: [{ $skip: 0 }, { $limit: 10 }],
+          paginatedResults: [{ $skip:temp_skip  }, { $limit: temp_limit }],
           totalCount: [
             {
               $count: "count",
